@@ -1,0 +1,729 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Manual de Uso — ProduzAI</title>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@600;700;800&family=DM+Sans:wght@300;400;500&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --ink:#0A0C0F;--ink2:#141820;--ink3:#1C2230;
+  --line:#232A38;--line2:#2D3748;
+  --muted:#8892A4;--muted2:#B8C0CC;
+  --white:#F0F4F8;--white2:#D4DCE8;
+  --accent:#3B82F6;--accent2:#60A5FA;
+  --green:#10B981;--amber:#F59E0B;--red:#EF4444;--purple:#8B5CF6;
+  --sidebar-w:260px;
+}
+html{scroll-behavior:smooth}
+body{
+  font-family:'DM Sans',sans-serif;
+  background:var(--ink);color:var(--white);
+  font-size:15px;line-height:1.7;
+}
+
+/* ── TOPBAR ── */
+.topbar{
+  position:fixed;top:0;left:0;right:0;height:56px;
+  background:rgba(10,12,15,.9);backdrop-filter:blur(20px);
+  border-bottom:1px solid var(--line);
+  display:flex;align-items:center;padding:0 20px;
+  gap:16px;z-index:100;
+}
+.topbar-logo{
+  font-family:'Syne',sans-serif;font-weight:800;
+  font-size:17px;letter-spacing:-.03em;
+  color:var(--white);text-decoration:none;
+  margin-right:8px;
+}
+.topbar-logo span{color:var(--accent)}
+.topbar-badge{
+  font-size:11px;padding:2px 8px;border-radius:4px;
+  background:rgba(59,130,246,.12);color:var(--accent2);
+  font-weight:500;border:1px solid rgba(59,130,246,.2);
+}
+.topbar-search{
+  flex:1;max-width:320px;
+  position:relative;
+}
+.topbar-search input{
+  width:100%;padding:7px 12px 7px 34px;
+  background:var(--ink2);border:1px solid var(--line2);
+  border-radius:7px;font-family:'DM Sans',sans-serif;
+  font-size:13px;color:var(--white);outline:none;
+  transition:border-color .15s;
+}
+.topbar-search input:focus{border-color:var(--accent)}
+.topbar-search input::placeholder{color:var(--muted)}
+.topbar-search::before{
+  content:'⌕';position:absolute;left:10px;top:50%;
+  transform:translateY(-50%);color:var(--muted);font-size:15px;
+  pointer-events:none;
+}
+.topbar-links{margin-left:auto;display:flex;gap:12px;align-items:center}
+.topbar-links a{
+  font-size:13px;color:var(--muted);text-decoration:none;
+  transition:color .15s;
+}
+.topbar-links a:hover{color:var(--white)}
+.topbar-app{
+  background:var(--accent);color:#fff;
+  padding:7px 14px;border-radius:7px;
+  font-size:13px;font-weight:600;
+  text-decoration:none;transition:background .15s;
+}
+.topbar-app:hover{background:#2563EB;color:#fff!important}
+
+/* ── LAYOUT ── */
+.layout{display:flex;padding-top:56px;min-height:100vh}
+
+/* ── SIDEBAR ── */
+.sidebar{
+  width:var(--sidebar-w);flex-shrink:0;
+  position:fixed;top:56px;left:0;bottom:0;
+  overflow-y:auto;
+  border-right:1px solid var(--line);
+  background:var(--ink2);
+  padding:20px 0 40px;
+}
+.sidebar::-webkit-scrollbar{width:4px}
+.sidebar::-webkit-scrollbar-thumb{background:var(--line2);border-radius:2px}
+.sidebar-section{margin-bottom:24px;padding:0 14px}
+.sidebar-section-title{
+  font-size:10px;font-weight:700;letter-spacing:.1em;
+  text-transform:uppercase;color:var(--muted);
+  padding:0 8px;margin-bottom:6px;
+}
+.sidebar-link{
+  display:flex;align-items:center;gap:8px;
+  padding:7px 10px;border-radius:7px;
+  font-size:13px;color:var(--muted2);
+  text-decoration:none;transition:all .15s;
+  cursor:pointer;
+}
+.sidebar-link:hover{background:var(--ink3);color:var(--white)}
+.sidebar-link.active{background:rgba(59,130,246,.1);color:var(--accent2);border-left:2px solid var(--accent)}
+.sidebar-link .icon{font-size:14px;width:18px;text-align:center;flex-shrink:0}
+.sidebar-link .badge-new{
+  margin-left:auto;font-size:9px;padding:1px 5px;
+  border-radius:4px;background:var(--green);color:#fff;font-weight:700;
+}
+
+/* ── CONTENT ── */
+.content{
+  margin-left:var(--sidebar-w);flex:1;
+  padding:48px 5vw 80px;
+  max-width:calc(860px + var(--sidebar-w));
+}
+
+/* ── TYPOGRAPHY ── */
+.page-title{
+  font-family:'Syne',sans-serif;
+  font-size:clamp(28px,4vw,42px);font-weight:800;
+  letter-spacing:-.03em;margin-bottom:10px;line-height:1.1;
+}
+.page-sub{font-size:17px;color:var(--muted);margin-bottom:40px;line-height:1.6}
+h2.doc-h2{
+  font-family:'Syne',sans-serif;font-size:24px;font-weight:700;
+  letter-spacing:-.02em;margin:52px 0 14px;
+  padding-top:52px;border-top:1px solid var(--line);
+  scroll-margin-top:80px;
+}
+h2.doc-h2:first-of-type{border-top:none;padding-top:0;margin-top:0}
+h3.doc-h3{
+  font-size:17px;font-weight:600;
+  margin:28px 0 10px;color:var(--white);
+}
+p.doc-p{color:var(--muted2);margin-bottom:14px;line-height:1.8}
+p.doc-p strong{color:var(--white);font-weight:500}
+
+/* ── CALLOUTS ── */
+.callout{
+  border-radius:10px;padding:14px 16px;margin:20px 0;
+  display:flex;gap:12px;align-items:flex-start;
+  font-size:14px;line-height:1.6;
+}
+.callout-icon{font-size:16px;flex-shrink:0;margin-top:1px}
+.callout.info{background:rgba(59,130,246,.08);border:1px solid rgba(59,130,246,.2);color:var(--muted2)}
+.callout.tip{background:rgba(16,185,129,.08);border:1px solid rgba(16,185,129,.2);color:var(--muted2)}
+.callout.warning{background:rgba(245,158,11,.08);border:1px solid rgba(245,158,11,.2);color:var(--muted2)}
+.callout.danger{background:rgba(239,68,68,.08);border:1px solid rgba(239,68,68,.2);color:var(--muted2)}
+.callout strong{color:var(--white)}
+
+/* ── STEPS ── */
+.doc-steps{display:flex;flex-direction:column;gap:0;margin:24px 0}
+.doc-step{
+  display:flex;gap:16px;align-items:flex-start;
+  padding-bottom:24px;position:relative;
+}
+.doc-step:not(:last-child)::before{
+  content:'';position:absolute;left:17px;top:36px;bottom:0;
+  width:1px;background:var(--line2);
+}
+.doc-step-num{
+  width:34px;height:34px;border-radius:50%;
+  background:rgba(59,130,246,.1);border:1px solid rgba(59,130,246,.3);
+  display:flex;align-items:center;justify-content:center;
+  font-family:'DM Mono',monospace;font-size:13px;font-weight:500;
+  color:var(--accent2);flex-shrink:0;
+}
+.doc-step-body{}
+.doc-step-title{font-size:15px;font-weight:600;margin-bottom:5px}
+.doc-step-desc{font-size:13px;color:var(--muted);line-height:1.6}
+
+/* ── CODE ── */
+code.inline{
+  font-family:'DM Mono',monospace;font-size:12px;
+  background:var(--ink3);border:1px solid var(--line2);
+  padding:1px 6px;border-radius:4px;color:var(--accent2);
+}
+.code-block{
+  background:var(--ink2);border:1px solid var(--line2);
+  border-radius:10px;overflow:hidden;margin:16px 0;
+}
+.code-block-header{
+  background:var(--ink3);padding:8px 14px;
+  display:flex;align-items:center;justify-content:space-between;
+  font-size:11px;color:var(--muted);font-family:'DM Mono',monospace;
+  border-bottom:1px solid var(--line);
+}
+.code-block pre{
+  padding:16px;overflow-x:auto;font-family:'DM Mono',monospace;
+  font-size:13px;line-height:1.6;color:var(--muted2);
+}
+.code-block pre .kw{color:#60A5FA}
+.code-block pre .str{color:#34D399}
+.code-block pre .com{color:var(--muted)}
+.code-block pre .num{color:#F59E0B}
+
+/* ── TABLE ── */
+.doc-table{width:100%;border-collapse:collapse;margin:16px 0;font-size:13px}
+.doc-table th{
+  text-align:left;padding:9px 12px;
+  background:var(--ink3);color:var(--muted2);
+  font-weight:600;font-size:11px;text-transform:uppercase;letter-spacing:.05em;
+  border-bottom:1px solid var(--line2);
+}
+.doc-table td{
+  padding:9px 12px;border-bottom:1px solid var(--line);
+  color:var(--muted2);
+}
+.doc-table tr:last-child td{border-bottom:none}
+.doc-table tr:hover td{background:var(--ink2)}
+
+/* ── FEATURE CARDS ── */
+.feature-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin:20px 0}
+@media(max-width:600px){.feature-grid{grid-template-columns:1fr}}
+.feature-card{
+  background:var(--ink2);border:1px solid var(--line2);
+  border-radius:10px;padding:16px;
+  transition:border-color .15s;
+}
+.feature-card:hover{border-color:var(--line)}
+.feature-card-icon{font-size:20px;margin-bottom:8px}
+.feature-card-title{font-size:14px;font-weight:600;margin-bottom:4px}
+.feature-card-desc{font-size:12px;color:var(--muted);line-height:1.5}
+
+/* ── TOC ── */
+.toc{
+  background:var(--ink2);border:1px solid var(--line2);
+  border-radius:10px;padding:18px;margin-bottom:36px;
+}
+.toc-title{font-size:11px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);margin-bottom:12px}
+.toc a{
+  display:block;font-size:13px;color:var(--muted2);
+  text-decoration:none;padding:4px 0;
+  transition:color .15s;border-left:2px solid transparent;
+  padding-left:10px;
+}
+.toc a:hover{color:var(--accent2);border-left-color:var(--accent)}
+.toc a.sub{padding-left:22px;font-size:12px}
+
+/* ── RESPONSIVE ── */
+@media(max-width:768px){
+  .sidebar{transform:translateX(-100%);transition:transform .3s;z-index:50}
+  .sidebar.open{transform:translateX(0)}
+  .content{margin-left:0}
+  .topbar-search{display:none}
+}
+
+/* ── VIDEO PLACEHOLDER ── */
+.video-placeholder{
+  background:var(--ink2);border:1px solid var(--line2);
+  border-radius:12px;padding:48px;text-align:center;margin:20px 0;
+}
+.video-play{
+  width:56px;height:56px;border-radius:50%;
+  background:var(--accent);
+  display:flex;align-items:center;justify-content:center;
+  font-size:20px;margin:0 auto 14px;cursor:pointer;
+  transition:transform .2s;
+}
+.video-play:hover{transform:scale(1.1)}
+</style>
+</head>
+<body>
+
+<!-- TOPBAR -->
+<div class="topbar">
+  <a href="landing.html" class="topbar-logo">Produz<span>AI</span></a>
+  <span class="topbar-badge">Manual de uso</span>
+  <div class="topbar-search">
+    <input type="text" placeholder="Buscar na documentação..." oninput="buscarDocs(this.value)">
+  </div>
+  <div class="topbar-links">
+    <a href="landing.html">← Início</a>
+    <a href="landing.html#precos">Preços</a>
+    <a href="produzai_completo.html" class="topbar-app">Abrir o app →</a>
+  </div>
+</div>
+
+<div class="layout">
+
+<!-- SIDEBAR -->
+<nav class="sidebar" id="sidebar">
+  <div class="sidebar-section">
+    <div class="sidebar-section-title">Introdução</div>
+    <a class="sidebar-link active" onclick="scrollTo('inicio')"><span class="icon">🏠</span>O que é o ProduzAI</a>
+    <a class="sidebar-link" onclick="scrollTo('primeiros-passos')"><span class="icon">🚀</span>Primeiros passos</a>
+    <a class="sidebar-link" onclick="scrollTo('requisitos')"><span class="icon">📋</span>Requisitos</a>
+  </div>
+  <div class="sidebar-section">
+    <div class="sidebar-section-title">Módulos</div>
+    <a class="sidebar-link" onclick="scrollTo('registro-foto')"><span class="icon">📷</span>Registro por foto</a>
+    <a class="sidebar-link" onclick="scrollTo('registro-manual')"><span class="icon">⌨</span>Digitação manual</a>
+    <a class="sidebar-link" onclick="scrollTo('dashboard')"><span class="icon">📊</span>Dashboard</a>
+    <a class="sidebar-link" onclick="scrollTo('metas')"><span class="icon">🎯</span>Metas individuais</a>
+    <a class="sidebar-link" onclick="scrollTo('relatorios')"><span class="icon">📄</span>Relatórios PDF</a>
+    <a class="sidebar-link" onclick="scrollTo('historico')"><span class="icon">🗂</span>Histórico</a>
+    <a class="sidebar-link" onclick="scrollTo('formulario-impressao')"><span class="icon">🖨</span>Formulário de impressão</a>
+  </div>
+  <div class="sidebar-section">
+    <div class="sidebar-section-title">Configurações</div>
+    <a class="sidebar-link" onclick="scrollTo('config-empresa')"><span class="icon">🏢</span>Dados da empresa</a>
+    <a class="sidebar-link" onclick="scrollTo('config-pessoas')"><span class="icon">👥</span>Costureiras e auxiliares</a>
+    <a class="sidebar-link" onclick="scrollTo('config-produtos')"><span class="icon">📦</span>Produtos e referências</a>
+  </div>
+  <div class="sidebar-section">
+    <div class="sidebar-section-title">Referência</div>
+    <a class="sidebar-link" onclick="scrollTo('colunas')"><span class="icon">📐</span>Colunas disponíveis</a>
+    <a class="sidebar-link" onclick="scrollTo('metricas-ref')"><span class="icon">📈</span>Métricas calculadas</a>
+    <a class="sidebar-link" onclick="scrollTo('faq')"><span class="icon">❓</span>FAQ</a>
+  </div>
+</nav>
+
+<!-- CONTENT -->
+<main class="content">
+
+  <!-- INTRODUÇÃO -->
+  <div id="inicio">
+    <p style="font-size:12px;color:var(--muted);margin-bottom:12px;font-family:'DM Mono',monospace">produzai / docs / introdução</p>
+    <h1 class="page-title">Manual de uso</h1>
+    <p class="page-sub">Aprenda a usar o ProduzAI em minutos. Do primeiro registro ao relatório PDF completo.</p>
+
+    <div class="toc">
+      <div class="toc-title">Nesta página</div>
+      <a href="#" onclick="scrollTo('primeiros-passos')">Primeiros passos</a>
+      <a href="#" onclick="scrollTo('registro-foto')" class="sub">→ Registro por foto</a>
+      <a href="#" onclick="scrollTo('registro-manual')" class="sub">→ Digitação manual</a>
+      <a href="#" onclick="scrollTo('dashboard')">Dashboard e métricas</a>
+      <a href="#" onclick="scrollTo('metas')">Metas individuais</a>
+      <a href="#" onclick="scrollTo('relatorios')">Relatórios PDF</a>
+
+      <a href="#" onclick="scrollTo('faq')">FAQ</a>
+    </div>
+
+    <div class="feature-grid">
+      <div class="feature-card">
+        <div class="feature-card-icon">📷</div>
+        <div class="feature-card-title">Foto → dados automáticos</div>
+        <div class="feature-card-desc">IA lê formulários físicos e extrai todos os campos em segundos</div>
+      </div>
+      <div class="feature-card">
+        <div class="feature-card-icon">📊</div>
+        <div class="feature-card-title">Dashboard completo</div>
+        <div class="feature-card-desc">7 abas de análise: costureira, qualidade, produto, turno, comparativo</div>
+      </div>
+      <div class="feature-card">
+        <div class="feature-card-icon">🎯</div>
+        <div class="feature-card-title">Metas individuais</div>
+        <div class="feature-card-desc">Meta e tolerância de defeitos específica por costureira e auxiliar</div>
+      </div>
+      <div class="feature-card">
+        <div class="feature-card-icon">📄</div>
+        <div class="feature-card-title">Relatórios PDF</div>
+        <div class="feature-card-desc">7 tipos de relatório com dados da empresa, metas e rankings</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- PRIMEIROS PASSOS -->
+  <h2 class="doc-h2" id="primeiros-passos">🚀 Primeiros passos</h2>
+  <p class="doc-p">Configure o ProduzAI em menos de 10 minutos seguindo estes passos:</p>
+
+  <div class="doc-steps">
+    <div class="doc-step">
+      <div class="doc-step-num">1</div>
+      <div class="doc-step-body">
+        <div class="doc-step-title">Abra o arquivo <code class="inline">produzai_completo.html</code> no navegador</div>
+        <div class="doc-step-desc">Basta arrastar o arquivo para o Chrome ou Firefox. Não precisa de servidor para começar.</div>
+      </div>
+    </div>
+    <div class="doc-step">
+      <div class="doc-step-num">2</div>
+      <div class="doc-step-body">
+        <div class="doc-step-title">Configure os dados da empresa em <strong>⚙ Config</strong></div>
+        <div class="doc-step-desc">Nome da empresa, logo, metas padrão e tolerância de defeitos. Esses dados aparecem em todos os relatórios PDF.</div>
+      </div>
+    </div>
+    <div class="doc-step">
+      <div class="doc-step-num">3</div>
+      <div class="doc-step-body">
+        <div class="doc-step-title">Cadastre as costureiras e auxiliares em <strong>🎯 Metas</strong></div>
+        <div class="doc-step-desc">Clique em "+ Costureira" e defina nome, número de identificação, meta de peças/dia e tolerância de defeitos individual.</div>
+      </div>
+    </div>
+    <div class="doc-step">
+      <div class="doc-step-num">4</div>
+      <div class="doc-step-body">
+        <div class="doc-step-title">Configure a API Key da Anthropic em <strong>⚙ Config → API Key</strong></div>
+        <div class="doc-step-desc">Necessária para o reconhecimento por foto. Obtenha em <strong>console.anthropic.com</strong>. Sem ela, o modo de digitação manual continua funcionando normalmente.</div>
+      </div>
+    </div>
+    <div class="doc-step">
+      <div class="doc-step-num">5</div>
+      <div class="doc-step-body">
+        <div class="doc-step-title">Faça o primeiro registro em <strong>📷 Registrar</strong></div>
+        <div class="doc-step-desc">Escolha "Via foto" ou "Digitar manualmente". Os dados aparecerão instantaneamente no dashboard.</div>
+      </div>
+    </div>
+  </div>
+
+  <div id="requisitos">
+    <h3 class="doc-h3">Requisitos mínimos</h3>
+    <table class="doc-table">
+      <thead><tr><th>Item</th><th>Requisito</th><th>Observação</th></tr></thead>
+      <tbody>
+        <tr><td>Navegador</td><td>Chrome 90+ ou Firefox 88+</td><td>Safari funciona com limitações</td></tr>
+        <tr><td>Celular (foto)</td><td>iOS 14+ ou Android 10+</td><td>Para câmera direta no formulário</td></tr>
+        <tr><td>Reconhecimento por foto</td><td>Habilitado pela empresa</td><td>Configurado pelo administrador do sistema</td></tr>
+        <tr><td>Internet</td><td>Para o modo foto e nuvem</td><td>Modo manual funciona offline</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <!-- REGISTRO POR FOTO -->
+  <h2 class="doc-h2" id="registro-foto">📷 Registro por foto</h2>
+  <p class="doc-p">O modo principal de registro. A funcionária tira uma foto do formulário preenchido e a IA extrai todos os dados automaticamente.</p>
+
+  <div class="callout tip">
+    <span class="callout-icon">💡</span>
+    <div><strong>Dica:</strong> No celular, o botão principal abre diretamente a câmera traseira. Use o botão "Escolher da galeria" para fotos já tiradas.</div>
+  </div>
+
+  <h3 class="doc-h3">Como tirar uma boa foto</h3>
+  <div class="doc-steps">
+    <div class="doc-step">
+      <div class="doc-step-num">💡</div>
+      <div class="doc-step-body">
+        <div class="doc-step-title">Boa iluminação</div>
+        <div class="doc-step-desc">Fotografe perto de uma janela ou com luz acesa. Sombras sobre o papel prejudicam a leitura.</div>
+      </div>
+    </div>
+    <div class="doc-step">
+      <div class="doc-step-num">📐</div>
+      <div class="doc-step-body">
+        <div class="doc-step-title">Celular reto e centralizado</div>
+        <div class="doc-step-desc">Segure direto acima do papel, sem inclinar. O formulário deve preencher a maior parte da tela.</div>
+      </div>
+    </div>
+    <div class="doc-step">
+      <div class="doc-step-num">✋</div>
+      <div class="doc-step-body">
+        <div class="doc-step-title">Firme, sem tremido</div>
+        <div class="doc-step-desc">Apoie o cotovelo ou use as duas mãos. Fotos tremidas causam falha na leitura.</div>
+      </div>
+    </div>
+  </div>
+
+  <h3 class="doc-h3">Erros de leitura e o que fazer</h3>
+  <table class="doc-table">
+    <thead><tr><th>Erro</th><th>Causa</th><th>Solução</th></tr></thead>
+    <tbody>
+      <tr><td>Não é um formulário</td><td>Imagem incorreta enviada</td><td>Tirar nova foto do formulário correto</td></tr>
+      <tr><td>Formulário ilegível</td><td>Foto escura, tremida ou inclinada</td><td>Melhorar iluminação e estabilidade</td></tr>
+      <tr><td>Formulário vazio</td><td>Formulário não preenchido</td><td>Verificar se o lado correto foi fotografado</td></tr>
+      <tr><td>Poucos campos lidos</td><td>Letra muito pequena ou rabiscada</td><td>Continuar e corrigir manualmente na tela de revisão</td></tr>
+    </tbody>
+  </table>
+
+  <!-- REGISTRO MANUAL -->
+  <h2 class="doc-h2" id="registro-manual">⌨ Digitação manual</h2>
+  <p class="doc-p">Alternativa à foto. Ideal para empresas que preferem não depender da IA ou quando a qualidade da foto é ruim.</p>
+
+  <div class="feature-grid">
+    <div class="feature-card">
+      <div class="feature-card-icon">⌨</div>
+      <div class="feature-card-title">Select de costureiras</div>
+      <div class="feature-card-desc">A coluna Nº Costureira mostra um dropdown com as costureiras cadastradas pelo nome</div>
+    </div>
+    <div class="feature-card">
+      <div class="feature-card-icon">📦</div>
+      <div class="feature-card-title">Autocomplete de produtos</div>
+      <div class="feature-card-desc">Produtos cadastrados na Config aparecem como sugestão ao digitar</div>
+    </div>
+    <div class="feature-card">
+      <div class="feature-card-icon">📊</div>
+      <div class="feature-card-title">Totais em tempo real</div>
+      <div class="feature-card-desc">Total de peças, defeitos e taxa atualizam conforme você digita</div>
+    </div>
+    <div class="feature-card">
+      <div class="feature-card-icon">↵</div>
+      <div class="feature-card-title">Atalho Enter</div>
+      <div class="feature-card-desc">Pressione Enter na última linha para criar uma nova automaticamente</div>
+    </div>
+  </div>
+
+  <!-- DASHBOARD -->
+  <h2 class="doc-h2" id="dashboard">📊 Dashboard</h2>
+  <p class="doc-p">O centro de análise do ProduzAI. Todos os dados registrados são processados e exibidos em tempo real.</p>
+
+  <h3 class="doc-h3">Abas disponíveis</h3>
+  <table class="doc-table">
+    <thead><tr><th>Aba</th><th>O que mostra</th></tr></thead>
+    <tbody>
+      <tr><td><strong>Por costureira</strong></td><td>Peças produzidas vs meta individual, ranking de produção com barra de progresso</td></tr>
+      <tr><td><strong>Qualidade</strong></td><td>Taxa de defeitos por costureira, distribuição dentro/fora da tolerância, ranking de qualidade</td></tr>
+      <tr><td><strong>Produto / OP</strong></td><td>Volume e defeitos por referência e ordem de produção, top 10 produtos</td></tr>
+      <tr><td><strong>Evolução</strong></td><td>Gráfico de linha da produção diária e taxa de defeitos ao longo do tempo</td></tr>
+      <tr><td><strong>Turno</strong></td><td>Produção e qualidade por turno (manhã/tarde/noite), detectado automaticamente</td></tr>
+      <tr><td><strong>Comparativo</strong></td><td>Comparação entre dois períodos: esta semana vs anterior, este mês vs passado, etc.</td></tr>
+      <tr><td><strong>Auxiliares</strong></td><td>Produtividade das conferentes: peças registradas vs meta, formulários vs meta diária</td></tr>
+    </tbody>
+  </table>
+
+  <div class="callout info">
+    <span class="callout-icon">ℹ</span>
+    <div><strong>Filtros:</strong> Use o seletor de período (semana/mês/tudo) e o filtro de costureira para focar a análise. O alerta vermelho no topo aparece automaticamente quando alguma costureira ultrapassou a tolerância de defeitos.</div>
+  </div>
+
+  <!-- METAS -->
+  <h2 class="doc-h2" id="metas">🎯 Metas individuais</h2>
+  <p class="doc-p">Cada costureira e auxiliar pode ter sua própria meta, independente do padrão global.</p>
+
+  <h3 class="doc-h3">Cadastrar costureira</h3>
+  <div class="doc-steps">
+    <div class="doc-step">
+      <div class="doc-step-num">1</div>
+      <div class="doc-step-body">
+        <div class="doc-step-title">Acesse a aba <strong>🎯 Metas</strong></div>
+        <div class="doc-step-desc">Clique em "+ Costureira" no canto superior direito.</div>
+      </div>
+    </div>
+    <div class="doc-step">
+      <div class="doc-step-num">2</div>
+      <div class="doc-step-body">
+        <div class="doc-step-title">Preencha o cadastro</div>
+        <div class="doc-step-desc"><strong>Nome:</strong> nome completo · <strong>Nº:</strong> número no formulário (ex: 1, 2, 03) · <strong>Meta:</strong> peças/dia · <strong>Tolerância:</strong> % máximo de defeitos aceito</div>
+      </div>
+    </div>
+    <div class="doc-step">
+      <div class="doc-step-num">3</div>
+      <div class="doc-step-body">
+        <div class="doc-step-title">Acompanhe o progresso</div>
+        <div class="doc-step-desc">O card da costureira mostra barra de progresso em verde (atingiu), amarelo (perto) ou vermelho (abaixo da meta).</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="callout warning">
+    <span class="callout-icon">⚠</span>
+    <div><strong>Importante:</strong> O <strong>Nº</strong> da costureira deve ser o mesmo número escrito no campo "Nº Costureira" do formulário físico. É assim que o sistema cruza os dados.</div>
+  </div>
+
+  <!-- RELATÓRIOS -->
+  <h2 class="doc-h2" id="relatorios">📄 Relatórios PDF</h2>
+  <p class="doc-p">Gere relatórios profissionais com um clique. Todos incluem o logo e dados da empresa.</p>
+
+  <table class="doc-table">
+    <thead><tr><th>Relatório</th><th>Conteúdo</th><th>Indicado para</th></tr></thead>
+    <tbody>
+      <tr><td><strong>Diário</strong></td><td>Resumo do dia, todas costureiras, peças e defeitos</td><td>Supervisão diária do chão de fábrica</td></tr>
+      <tr><td><strong>Semanal</strong></td><td>Evolução da semana com gráfico de produção</td><td>Reunião de segunda-feira</td></tr>
+      <tr><td><strong>Mensal</strong></td><td>Consolidado com tendências e ranking completo</td><td>Relatório para gestão</td></tr>
+      <tr><td><strong>Por costureira</strong></td><td>Histórico individual vs meta, qualidade</td><td>Feedback individual e RH</td></tr>
+      <tr><td><strong>Por produto / OP</strong></td><td>Volume e qualidade por referência</td><td>Análise de defeitos por produto</td></tr>
+      <tr><td><strong>Gerencial</strong></td><td>Visão executiva com todos os KPIs</td><td>Apresentação para sócios/diretoria</td></tr>
+      <tr><td><strong>Personalizado</strong></td><td>Filtro por data e costureira específica</td><td>Análise pontual</td></tr>
+    </tbody>
+  </table>
+
+  <!-- FORMULÁRIO DE IMPRESSÃO -->
+  <h2 class="doc-h2" id="formulario-impressao">🖨 Formulário de impressão</h2>
+  <p class="doc-p">Imprima formulários padronizados com o logo e dados da sua empresa para os funcionários preencherem.</p>
+
+  <div class="doc-steps">
+    <div class="doc-step">
+      <div class="doc-step-num">1</div>
+      <div class="doc-step-body">
+        <div class="doc-step-title">Acesse via Config → "Abrir formulário de impressão"</div>
+        <div class="doc-step-desc">Ou abra o arquivo <code class="inline">formulario_impressao.html</code> diretamente.</div>
+      </div>
+    </div>
+    <div class="doc-step">
+      <div class="doc-step-num">2</div>
+      <div class="doc-step-body">
+        <div class="doc-step-title">Preencha os dados da empresa e faça upload do logo</div>
+        <div class="doc-step-desc">Nome, CNPJ, telefone e endereço aparecem no cabeçalho de cada folha.</div>
+      </div>
+    </div>
+    <div class="doc-step">
+      <div class="doc-step-num">3</div>
+      <div class="doc-step-body">
+        <div class="doc-step-title">Marque as colunas que a empresa usa</div>
+        <div class="doc-step-desc">15 colunas disponíveis: Produto, Cor, Tamanho, OP, Lote, Qtd. Conferida, Defeitos, Nº Costureira, Máquina, Operador, Turno, Hora, Observação e mais.</div>
+      </div>
+    </div>
+    <div class="doc-step">
+      <div class="doc-step-num">4</div>
+      <div class="doc-step-body">
+        <div class="doc-step-title">Clique em "Imprimir formulários"</div>
+        <div class="doc-step-desc">O diálogo de impressão do sistema abre direto. Escolha a impressora ou salve como PDF.</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- CONFIG EMPRESA -->
+  <h2 class="doc-h2" id="config-empresa">🏢 Empresa e logo</h2>
+  <p class="doc-p">Os dados da empresa aparecem em todos os relatórios PDF e na tela principal.</p>
+  <table class="doc-table">
+    <thead><tr><th>Campo</th><th>Onde aparece</th></tr></thead>
+    <tbody>
+      <tr><td>Nome da empresa</td><td>Topbar do app, cabeçalho PDF, formulário impresso</td></tr>
+      <tr><td>Logo</td><td>Formulário de impressão (em breve nos PDFs)</td></tr>
+      <tr><td>CNPJ / Telefone / Endereço</td><td>Formulário de impressão e PDFs gerenciais</td></tr>
+      <tr><td>Meta padrão (costureira)</td><td>Usada quando não há meta individual cadastrada</td></tr>
+      <tr><td>Tolerância padrão (%)</td><td>Usada quando não há tolerância individual</td></tr>
+    </tbody>
+  </table>
+
+  <!-- CONFIG PESSOAS -->
+  <h2 class="doc-h2" id="config-pessoas">👥 Costureiras e auxiliares</h2>
+  <p class="doc-p">Cadastro completo com metas individuais. Veja a seção <a href="#" onclick="scrollTo('metas')" style="color:var(--accent2)">Metas individuais</a> para detalhes.</p>
+
+  <!-- CONFIG PRODUTOS -->
+  <h2 class="doc-h2" id="config-produtos">📦 Cadastro de produtos e referências</h2>
+  <p class="doc-p">Cadastre os produtos e referências que sua empresa produz. Eles aparecem como sugestão automática no campo Produto do registro manual, agilizando o preenchimento.</p>
+  <div class="doc-steps">
+    <div class="doc-step">
+      <div class="doc-step-num">1</div>
+      <div class="doc-step-body">
+        <div class="doc-step-title">Acesse <strong>⚙ Config → Cadastro de produtos</strong></div>
+        <div class="doc-step-desc">Role até a seção "Cadastro de produtos / referências".</div>
+      </div>
+    </div>
+    <div class="doc-step">
+      <div class="doc-step-num">2</div>
+      <div class="doc-step-body">
+        <div class="doc-step-title">Digite o nome e clique em "+ Adicionar"</div>
+        <div class="doc-step-desc">Ou pressione Enter. O produto aparece como uma tag. Clique no × para remover.</div>
+      </div>
+    </div>
+    <div class="doc-step">
+      <div class="doc-step-num">3</div>
+      <div class="doc-step-body">
+        <div class="doc-step-title">Use no registro manual</div>
+        <div class="doc-step-desc">Ao registrar manualmente, comece a digitar no campo Produto — os cadastrados aparecem como sugestão automática.</div>
+      </div>
+    </div>
+  </div>
+
+    <!-- COLUNAS DE REFERÊNCIA -->
+  <h2 class="doc-h2" id="colunas">📐 Colunas disponíveis no formulário</h2>
+  <table class="doc-table">
+    <thead><tr><th>Coluna</th><th>Tipo</th><th>Métrica gerada</th></tr></thead>
+    <tbody>
+      <tr><td>Produto</td><td>Texto</td><td>Peças e defeitos por produto</td></tr>
+      <tr><td>Modelo / Referência</td><td>Texto</td><td>Agrupamento por referência</td></tr>
+      <tr><td>Cor</td><td>Texto</td><td>Volume por cor (em desenvolvimento)</td></tr>
+      <tr><td>Tamanho</td><td>Select (PP–XGG / 34–48)</td><td>Volume por tamanho (em desenvolvimento)</td></tr>
+      <tr><td>OP</td><td>Texto/número</td><td>Peças e defeitos por ordem de produção</td></tr>
+      <tr><td>Lote</td><td>Texto</td><td>Rastreabilidade por lote (em desenvolvimento)</td></tr>
+      <tr><td><strong>Qtd. Conferida</strong></td><td>Número</td><td>Base de todos os KPIs de produção</td></tr>
+      <tr><td><strong>Qtd. Defeitos</strong></td><td>Número</td><td>Taxa de defeitos, rankings de qualidade</td></tr>
+      <tr><td><strong>Nº Costureira</strong></td><td>Número/texto</td><td>Todos os rankings e metas individuais</td></tr>
+      <tr><td>Máquina</td><td>Texto</td><td>Métricas por máquina (em desenvolvimento)</td></tr>
+      <tr><td>Operador</td><td>Texto</td><td>Produção e ranking por operador</td></tr>
+      <tr><td>Turno</td><td>Select</td><td>Comparativo manhã/tarde/noite</td></tr>
+      <tr><td>Hora Início / Fim</td><td>Horário</td><td>Cálculo de ritmo (em desenvolvimento)</td></tr>
+      <tr><td>Observação</td><td>Texto livre</td><td>Aparece no histórico e relatórios</td></tr>
+    </tbody>
+  </table>
+
+  <!-- MÉTRICAS -->
+  <h2 class="doc-h2" id="metricas-ref">📈 Métricas calculadas</h2>
+  <table class="doc-table">
+    <thead><tr><th>Métrica</th><th>Fórmula</th></tr></thead>
+    <tbody>
+      <tr><td>Taxa de defeitos</td><td>(Qtd. Defeitos ÷ Qtd. Conferida) × 100</td></tr>
+      <tr><td>Taxa de qualidade</td><td>100 − Taxa de defeitos</td></tr>
+      <tr><td>Performance vs meta</td><td>(Peças produzidas ÷ Meta individual) × 100</td></tr>
+      <tr><td>Status "Alerta"</td><td>Taxa de defeitos > Tolerância individual</td></tr>
+      <tr><td>Status "Meta atingida"</td><td>Peças ≥ Meta individual da costureira</td></tr>
+    </tbody>
+  </table>
+
+  <!-- FAQ -->
+  <h2 class="doc-h2" id="faq">❓ FAQ</h2>
+  <h3 class="doc-h3">Os dados ficam salvos se eu fechar o navegador?</h3>
+  <p class="doc-p">Sim. Seus dados ficam salvos automaticamente. Enquanto usar o mesmo navegador e dispositivo, nada se perde ao fechar ou atualizar a página.</p>
+
+  <h3 class="doc-h3">Posso usar em múltiplos celulares ao mesmo tempo?</h3>
+  <p class="doc-p">Sim, desde que sua conta esteja sincronizada com a nuvem (configurada pelo administrador). Todos os dispositivos da sua empresa acessam os mesmos dados em tempo real.</p>
+
+  <h3 class="doc-h3">A IA erra muito?</h3>
+  <p class="doc-p">A taxa de acerto é alta para formulários com letra legível e boa iluminação. Campos com letra muito pequena ou manuscrita difícil podem vir em branco — a tela de revisão permite corrigir antes de salvar.</p>
+
+  <h3 class="doc-h3">Quantos registros posso ter?</h3>
+  <p class="doc-p">Sem limite definido. O histórico exibe 20 por página para performance. O Supabase gratuito suporta até 500MB de dados, suficiente para anos de registros de uma confecção média.</p>
+
+  <h3 class="doc-h3">Como altero minha senha?</h3>
+  <p class="doc-p">Na tela de login, clique em "Esqueci minha senha". Informe seu email e você receberá um link para redefinição em instantes.</p>
+
+  <h3 class="doc-h3">Como faço backup dos meus dados?</h3>
+  <p class="doc-p">Acesse <strong>🗂 Histórico → botão ⬇ CSV</strong> para exportar todos os registros em uma planilha. Faça isso periodicamente como backup local.</p>
+
+  <div style="margin-top:56px;padding:28px;background:var(--ink2);border:1px solid var(--line2);border-radius:14px;text-align:center">
+    <div style="font-size:20px;margin-bottom:10px">🙋</div>
+    <div style="font-family:'Syne',sans-serif;font-size:18px;font-weight:700;margin-bottom:6px">Não encontrou o que procurava?</div>
+    <div style="font-size:14px;color:var(--muted);margin-bottom:16px">Entre em contato pelo email de suporte.</div>
+    <a href="/cdn-cgi/l/email-protection#156660657a6761705565677a71606f747c3b767a783b7767" style="display:inline-block;padding:10px 24px;background:var(--accent);color:#fff;border-radius:8px;text-decoration:none;font-weight:600;font-size:14px"><span class="__cf_email__" data-cfemail="e39096938c919786a393918c879699828acd808c8ecd8191">[email&#160;protected]</span></a>
+  </div>
+
+</main>
+</div>
+
+<script data-cfasync="false" src="/cdn-cgi/scripts/5c5dd728/cloudflare-static/email-decode.min.js"></script><script>
+// Scroll to section
+function scrollTo(id){
+  const el=document.getElementById(id);
+  if(el) el.scrollIntoView({behavior:'smooth',block:'start'});
+  // update active sidebar link
+  document.querySelectorAll('.sidebar-link').forEach(l=>l.classList.remove('active'));
+  event?.target?.closest('.sidebar-link')?.classList.add('active');
+}
+
+// Highlight active section on scroll
+const sections=document.querySelectorAll('[id]');
+const sideLinks=document.querySelectorAll('.sidebar-link');
+window.addEventListener('scroll',()=>{
+  let current='';
+  sections.forEach(s=>{ if(window.scrollY>=s.offsetTop-100) current=s.id; });
+  sideLinks.forEach(l=>{
+    l.classList.remove('active');
+    if(l.getAttribute('onclick')?.includes(current)) l.classList.add('active');
+  });
+});
+
+/

@@ -1,0 +1,671 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Guia Técnico (Admin) — ProduzAI</title>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@600;700;800&family=DM+Sans:wght@300;400;500&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --ink:#0A0C0F;--ink2:#141820;--ink3:#1C2230;
+  --line:#232A38;--line2:#2D3748;
+  --muted:#8892A4;--muted2:#B8C0CC;
+  --white:#F0F4F8;--white2:#D4DCE8;
+  --accent:#F59E0B;--accent2:#FCD34D;
+  --green:#10B981;--blue:#3B82F6;--red:#EF4444;--purple:#8B5CF6;
+  --sidebar-w:270px;
+}
+html{scroll-behavior:smooth}
+body{font-family:'DM Sans',sans-serif;background:var(--ink);color:var(--white);font-size:15px;line-height:1.7}
+
+/* ── ADMIN BADGE TOPBAR ── */
+.topbar{
+  position:fixed;top:0;left:0;right:0;height:56px;
+  background:rgba(10,12,15,.95);backdrop-filter:blur(20px);
+  border-bottom:2px solid rgba(245,158,11,.3);
+  display:flex;align-items:center;padding:0 20px;gap:16px;z-index:100;
+}
+.topbar-logo{font-family:'Syne',sans-serif;font-weight:800;font-size:17px;letter-spacing:-.03em;color:var(--white);text-decoration:none;margin-right:4px}
+.topbar-logo span{color:var(--blue)}
+.topbar-badge{
+  font-size:11px;padding:3px 10px;border-radius:4px;
+  background:rgba(245,158,11,.15);color:var(--accent2);
+  font-weight:700;border:1px solid rgba(245,158,11,.3);
+  letter-spacing:.05em;text-transform:uppercase;
+}
+.topbar-links{margin-left:auto;display:flex;gap:12px;align-items:center}
+.topbar-links a{font-size:13px;color:var(--muted);text-decoration:none;transition:color .15s}
+.topbar-links a:hover{color:var(--white)}
+.topbar-app{background:var(--blue);color:#fff;padding:7px 14px;border-radius:7px;font-size:13px;font-weight:600;text-decoration:none;transition:background .15s}
+.topbar-app:hover{background:#2563EB;color:#fff!important}
+
+/* ── LAYOUT ── */
+.layout{display:flex;padding-top:56px;min-height:100vh}
+.sidebar{
+  width:var(--sidebar-w);flex-shrink:0;
+  position:fixed;top:56px;left:0;bottom:0;
+  overflow-y:auto;border-right:1px solid var(--line);
+  background:var(--ink2);padding:20px 0 40px;
+}
+.sidebar::-webkit-scrollbar{width:4px}
+.sidebar::-webkit-scrollbar-thumb{background:var(--line2);border-radius:2px}
+.sidebar-section{margin-bottom:24px;padding:0 14px}
+.sidebar-section-title{font-size:10px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);padding:0 8px;margin-bottom:6px}
+.sidebar-link{
+  display:flex;align-items:center;gap:8px;
+  padding:7px 10px;border-radius:7px;
+  font-size:13px;color:var(--muted2);text-decoration:none;transition:all .15s;cursor:pointer;
+}
+.sidebar-link:hover{background:var(--ink3);color:var(--white)}
+.sidebar-link.active{background:rgba(245,158,11,.1);color:var(--accent2);border-left:2px solid var(--accent)}
+.sidebar-link .icon{font-size:14px;width:18px;text-align:center;flex-shrink:0}
+.sidebar-status{
+  margin:16px 14px 0;
+  padding:12px;border-radius:8px;
+  background:rgba(245,158,11,.06);
+  border:1px solid rgba(245,158,11,.2);
+  font-size:12px;color:var(--accent2);
+}
+.sidebar-status-title{font-weight:700;margin-bottom:8px;font-size:11px;text-transform:uppercase;letter-spacing:.06em}
+.status-item{display:flex;align-items:center;gap:6px;padding:3px 0}
+.status-dot{width:7px;height:7px;border-radius:50%;flex-shrink:0}
+.dot-ok{background:var(--green)}
+.dot-pending{background:var(--accent)}
+.dot-missing{background:var(--red)}
+
+.content{margin-left:var(--sidebar-w);flex:1;padding:48px 5vw 80px;max-width:calc(860px + var(--sidebar-w))}
+
+/* ── TYPOGRAPHY ── */
+.page-title{font-family:'Syne',sans-serif;font-size:clamp(26px,4vw,40px);font-weight:800;letter-spacing:-.03em;margin-bottom:8px;line-height:1.1}
+.page-sub{font-size:16px;color:var(--muted);margin-bottom:36px;line-height:1.6}
+h2.doc-h2{
+  font-family:'Syne',sans-serif;font-size:22px;font-weight:700;
+  letter-spacing:-.02em;margin:52px 0 12px;
+  padding-top:52px;border-top:1px solid var(--line);scroll-margin-top:80px;
+}
+h2.doc-h2:first-of-type{border-top:none;padding-top:0;margin-top:0}
+h3.doc-h3{font-size:16px;font-weight:600;margin:24px 0 8px;color:var(--white)}
+p.doc-p{color:var(--muted2);margin-bottom:12px;line-height:1.8}
+p.doc-p strong{color:var(--white);font-weight:500}
+
+/* ── CALLOUTS ── */
+.callout{border-radius:10px;padding:13px 15px;margin:16px 0;display:flex;gap:11px;align-items:flex-start;font-size:14px;line-height:1.6}
+.callout-icon{font-size:15px;flex-shrink:0;margin-top:1px}
+.callout.info{background:rgba(59,130,246,.08);border:1px solid rgba(59,130,246,.2);color:var(--muted2)}
+.callout.tip{background:rgba(16,185,129,.08);border:1px solid rgba(16,185,129,.2);color:var(--muted2)}
+.callout.warning{background:rgba(245,158,11,.08);border:1px solid rgba(245,158,11,.2);color:var(--muted2)}
+.callout.danger{background:rgba(239,68,68,.08);border:1px solid rgba(239,68,68,.2);color:var(--muted2)}
+.callout strong{color:var(--white)}
+
+/* ── STEPS ── */
+.doc-steps{display:flex;flex-direction:column;gap:0;margin:20px 0}
+.doc-step{display:flex;gap:14px;align-items:flex-start;padding-bottom:22px;position:relative}
+.doc-step:not(:last-child)::before{content:'';position:absolute;left:16px;top:34px;bottom:0;width:1px;background:var(--line2)}
+.doc-step-num{width:32px;height:32px;border-radius:50%;background:rgba(245,158,11,.1);border:1px solid rgba(245,158,11,.25);display:flex;align-items:center;justify-content:center;font-family:'DM Mono',monospace;font-size:12px;font-weight:500;color:var(--accent2);flex-shrink:0}
+.doc-step-title{font-size:14px;font-weight:600;margin-bottom:4px}
+.doc-step-desc{font-size:13px;color:var(--muted);line-height:1.6}
+
+/* ── CODE ── */
+code.inline{font-family:'DM Mono',monospace;font-size:12px;background:var(--ink3);border:1px solid var(--line2);padding:1px 6px;border-radius:4px;color:#FCD34D}
+.code-block{background:var(--ink2);border:1px solid var(--line2);border-radius:10px;overflow:hidden;margin:14px 0}
+.code-block-header{background:var(--ink3);padding:8px 14px;display:flex;align-items:center;justify-content:space-between;font-size:11px;color:var(--muted);font-family:'DM Mono',monospace;border-bottom:1px solid var(--line)}
+.code-block pre{padding:16px;overflow-x:auto;font-family:'DM Mono',monospace;font-size:13px;line-height:1.6;color:var(--muted2)}
+
+/* ── TABLE ── */
+.doc-table{width:100%;border-collapse:collapse;margin:14px 0;font-size:13px}
+.doc-table th{text-align:left;padding:9px 12px;background:var(--ink3);color:var(--muted2);font-weight:600;font-size:11px;text-transform:uppercase;letter-spacing:.05em;border-bottom:1px solid var(--line2)}
+.doc-table td{padding:9px 12px;border-bottom:1px solid var(--line);color:var(--muted2)}
+.doc-table tr:last-child td{border-bottom:none}
+.doc-table tr:hover td{background:rgba(255,255,255,.02)}
+
+/* ── CHECKLIST ── */
+.checklist{display:flex;flex-direction:column;gap:8px;margin:16px 0}
+.check-item{
+  display:flex;align-items:center;gap:10px;
+  padding:10px 14px;border-radius:8px;
+  border:1px solid var(--line2);background:var(--ink2);
+  font-size:13px;cursor:pointer;transition:all .15s;
+}
+.check-item:hover{border-color:var(--line)}
+.check-item input[type=checkbox]{width:15px;height:15px;accent-color:var(--green);cursor:pointer}
+.check-item.done{border-color:rgba(16,185,129,.25);background:rgba(16,185,129,.04)}
+.check-item.done span{text-decoration:line-through;color:var(--muted)}
+
+/* ── PROGRESS BAR ── */
+.deploy-progress{
+  background:var(--ink2);border:1px solid var(--line2);
+  border-radius:10px;padding:16px;margin:20px 0;
+}
+.deploy-progress-title{font-size:12px;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:.06em;margin-bottom:10px}
+.progress-bar{height:8px;background:var(--ink3);border-radius:4px;overflow:hidden;margin-bottom:6px}
+.progress-fill{height:100%;background:linear-gradient(90deg,var(--accent),var(--green));border-radius:4px;transition:width .5s ease}
+.progress-label{font-size:12px;color:var(--muted);display:flex;justify-content:space-between}
+
+/* ── ENV VARS TABLE ── */
+.env-table{background:var(--ink2);border:1px solid var(--line2);border-radius:10px;overflow:hidden;margin:14px 0}
+.env-row{display:grid;grid-template-columns:200px 1fr;border-bottom:1px solid var(--line)}
+.env-row:last-child{border-bottom:none}
+.env-key{font-family:'DM Mono',monospace;font-size:12px;color:var(--accent2);padding:10px 14px;background:var(--ink3);border-right:1px solid var(--line)}
+.env-val{font-size:13px;color:var(--muted2);padding:10px 14px}
+
+@media(max-width:768px){.sidebar{transform:translateX(-100%)}.content{margin-left:0}}
+</style>
+</head>
+<body>
+
+<!-- TOPBAR -->
+<div class="topbar">
+  <a href="landing.html" class="topbar-logo">Produz<span>AI</span></a>
+  <span class="topbar-badge">🔧 Admin</span>
+  <div class="topbar-links">
+    <a href="docs.html">Manual do usuário</a>
+    <a href="landing.html">← Site</a>
+    <a href="produzai_completo.html" class="topbar-app">Abrir o app →</a>
+  </div>
+</div>
+
+<div class="layout">
+
+<!-- SIDEBAR -->
+<nav class="sidebar">
+  <div class="sidebar-section">
+    <div class="sidebar-section-title">Visão geral</div>
+    <a class="sidebar-link active" onclick="ir('overview')"><span class="icon">🗺</span>Checklist de deploy</a>
+    <a class="sidebar-link" onclick="ir('arquitetura')"><span class="icon">🏗</span>Arquitetura do projeto</a>
+    <a class="sidebar-link" onclick="ir('arquivos')"><span class="icon">📁</span>Estrutura de arquivos</a>
+  </div>
+  <div class="sidebar-section">
+    <div class="sidebar-section-title">Infraestrutura</div>
+    <a class="sidebar-link" onclick="ir('supabase')"><span class="icon">🗄</span>1. Supabase (banco)</a>
+    <a class="sidebar-link" onclick="ir('anthropic')"><span class="icon">🤖</span>2. API Key Anthropic</a>
+    <a class="sidebar-link" onclick="ir('vercel')"><span class="icon">▲</span>3. Deploy no Vercel</a>
+    <a class="sidebar-link" onclick="ir('stripe')"><span class="icon">💳</span>4. Stripe (pagamentos)</a>
+  </div>
+  <div class="sidebar-section">
+    <div class="sidebar-section-title">Operação</div>
+    <a class="sidebar-link" onclick="ir('planos')"><span class="icon">💰</span>Gerenciar planos</a>
+    <a class="sidebar-link" onclick="ir('clientes')"><span class="icon">👥</span>Gerenciar clientes</a>
+    <a class="sidebar-link" onclick="ir('custos')"><span class="icon">📊</span>Estimativa de custos</a>
+    <a class="sidebar-link" onclick="ir('troubleshoot')"><span class="icon">🔍</span>Troubleshooting</a>
+  </div>
+
+  <!-- STATUS INFRA -->
+  <div class="sidebar-status">
+    <div class="sidebar-status-title">Status da infra</div>
+    <div class="status-item"><div class="status-dot dot-pending"></div>Supabase — pendente</div>
+    <div class="status-item"><div class="status-dot dot-pending"></div>API Key — pendente</div>
+    <div class="status-item"><div class="status-dot dot-pending"></div>Vercel — pendente</div>
+    <div class="status-item"><div class="status-dot dot-pending"></div>Stripe — pendente</div>
+  </div>
+</nav>
+
+<!-- CONTENT -->
+<main class="content">
+
+  <!-- OVERVIEW -->
+  <div id="overview">
+    <p style="font-size:11px;color:var(--muted);margin-bottom:10px;font-family:'DM Mono',monospace">produzai / admin / deploy</p>
+    <h1 class="page-title">Guia técnico — Admin</h1>
+    <p class="page-sub">Tudo que você precisa fazer para colocar o ProduzAI em produção. Este guia é interno — não compartilhe com clientes.</p>
+
+    <div class="callout warning">
+      <span class="callout-icon">⚠</span>
+      <div><strong>Documento interno.</strong> Contém credenciais, arquitetura e configurações sensíveis do sistema. Não indexe este arquivo publicamente.</div>
+    </div>
+
+    <h2 class="doc-h2" style="margin-top:32px;padding-top:0;border-top:none">🗺 Checklist de deploy</h2>
+    <p class="doc-p">Siga nesta ordem. Cada etapa depende da anterior.</p>
+
+    <div class="deploy-progress">
+      <div class="deploy-progress-title">Progresso de configuração</div>
+      <div class="progress-bar"><div class="progress-fill" id="progressFill" style="width:0%"></div></div>
+      <div class="progress-label"><span id="progressLabel">0 de 12 etapas</span><span id="progressPct">0%</span></div>
+    </div>
+
+    <div class="checklist" id="checklist">
+      <label class="check-item"><input type="checkbox" onchange="updateProgress()"><span>Criar conta no Supabase (supabase.com)</span></label>
+      <label class="check-item"><input type="checkbox" onchange="updateProgress()"><span>Criar projeto Supabase — região São Paulo</span></label>
+      <label class="check-item"><input type="checkbox" onchange="updateProgress()"><span>Executar <code class="inline">supabase_setup.sql</code> no SQL Editor</span></label>
+      <label class="check-item"><input type="checkbox" onchange="updateProgress()"><span>Copiar URL e anon key do Supabase → colar na Config do app</span></label>
+      <label class="check-item"><input type="checkbox" onchange="updateProgress()"><span>Criar API Key na Anthropic (console.anthropic.com)</span></label>
+      <label class="check-item"><input type="checkbox" onchange="updateProgress()"><span>Colar a API Key na Config do app → Salvar</span></label>
+      <label class="check-item"><input type="checkbox" onchange="updateProgress()"><span>Criar conta no Vercel (vercel.com)</span></label>
+      <label class="check-item"><input type="checkbox" onchange="updateProgress()"><span>Fazer upload dos arquivos no Vercel → domínio ativo</span></label>
+      <label class="check-item"><input type="checkbox" onchange="updateProgress()"><span>Criar conta no Stripe (stripe.com)</span></label>
+      <label class="check-item"><input type="checkbox" onchange="updateProgress()"><span>Criar produtos Básico e Profissional no Stripe</span></label>
+      <label class="check-item"><input type="checkbox" onchange="updateProgress()"><span>Preencher <code class="inline">PRICE_TO_PLANO</code> no stripe_webhook.js com os price_ids</span></label>
+      <label class="check-item"><input type="checkbox" onchange="updateProgress()"><span>Configurar webhook Stripe → URL do Vercel</span></label>
+    </div>
+  </div>
+
+  <!-- ARQUITETURA -->
+  <h2 class="doc-h2" id="arquitetura">🏗 Arquitetura do projeto</h2>
+  <p class="doc-p">O ProduzAI é uma aplicação <strong>100% frontend</strong> (HTML/CSS/JS puro), sem servidor próprio. Os serviços de terceiros fazem o trabalho pesado.</p>
+  <table class="doc-table">
+    <thead><tr><th>Camada</th><th>Serviço</th><th>Responsabilidade</th><th>Custo</th></tr></thead>
+    <tbody>
+      <tr><td><strong>Frontend</strong></td><td>Vercel</td><td>Hospedagem dos arquivos HTML</td><td>Gratuito</td></tr>
+      <tr><td><strong>Banco de dados</strong></td><td>Supabase</td><td>Auth + PostgreSQL + RLS</td><td>Gratuito até 500MB</td></tr>
+      <tr><td><strong>IA (visão)</strong></td><td>Anthropic Claude</td><td>Leitura dos formulários por foto</td><td>~R$0,05–0,10/foto</td></tr>
+      <tr><td><strong>Pagamentos</strong></td><td>Stripe</td><td>Assinaturas mensais, webhooks</td><td>2.9% + R$0,60/transação</td></tr>
+    </tbody>
+  </table>
+
+  <div class="callout tip">
+    <span class="callout-icon">💡</span>
+    <div><strong>Modo offline:</strong> Sem Supabase configurado, o app usa <code class="inline">localStorage</code> do navegador. Útil para demos e testes — os dados ficam apenas naquele dispositivo.</div>
+  </div>
+
+  <!-- ARQUIVOS -->
+  <h2 class="doc-h2" id="arquivos">📁 Estrutura de arquivos</h2>
+  <div class="code-block">
+    <div class="code-block-header"><span>Arquivos do projeto</span></div>
+    <pre>produzai/
+├── produzai_completo.html    ← App principal
+├── landing.html              ← Landing page de venda
+├── docs.html                 ← Manual do usuário (público)
+├── docs-admin.html           ← Este arquivo (interno, não publicar)
+├── formulario_impressao.html ← Formulário configurável para impressão
+├── supabase_setup.sql        ← SQL para criar todas as tabelas
+└── stripe_webhook.js         ← Webhook handler (deploy no Vercel)</pre>
+  </div>
+
+  <div class="callout warning">
+    <span class="callout-icon">⚠</span>
+    <div><strong>Não publique:</strong> O arquivo <code class="inline">docs-admin.html</code> não deve ficar acessível publicamente. Guarde localmente ou proteja com senha no Vercel.</div>
+  </div>
+
+  <!-- SUPABASE -->
+  <h2 class="doc-h2" id="supabase">🗄 1. Configurar Supabase</h2>
+  <p class="doc-p">O banco de dados central. Gerencia autenticação, dados das empresas e isolamento por cliente (RLS).</p>
+
+  <div class="doc-steps">
+    <div class="doc-step">
+      <div class="doc-step-num">1</div>
+      <div class="doc-step-body">
+        <div class="doc-step-title">Criar conta em <code class="inline">supabase.com</code></div>
+        <div class="doc-step-desc">Login com GitHub é o mais rápido. A conta gratuita suporta até 2 projetos ativos.</div>
+      </div>
+    </div>
+    <div class="doc-step">
+      <div class="doc-step-num">2</div>
+      <div class="doc-step-body">
+        <div class="doc-step-title">New project → configurações</div>
+        <div class="doc-step-desc">
+          Nome: <code class="inline">produzai</code> ·
+          Região: <code class="inline">South America (São Paulo)</code> ·
+          Senha: gere uma forte e guarde em local seguro.
+        </div>
+      </div>
+    </div>
+    <div class="doc-step">
+      <div class="doc-step-num">3</div>
+      <div class="doc-step-body">
+        <div class="doc-step-title">Executar o SQL de setup</div>
+        <div class="doc-step-desc">
+          Painel → <strong>SQL Editor → New query</strong> → cole o conteúdo completo de <code class="inline">supabase_setup.sql</code> → clique em <strong>Run</strong>.<br><br>
+          O script cria: tabelas <code class="inline">empresas</code>, <code class="inline">usuarios</code>, <code class="inline">pessoas</code>, <code class="inline">registros</code>, <code class="inline">planos</code> · índices de performance · políticas RLS · funções RPC · triggers de updated_at.
+        </div>
+      </div>
+    </div>
+    <div class="doc-step">
+      <div class="doc-step-num">4</div>
+      <div class="doc-step-body">
+        <div class="doc-step-title">Copiar as credenciais: Settings → API</div>
+        <div class="doc-step-desc">
+          Você precisa de dois valores:<br>
+          • <strong>Project URL</strong>: <code class="inline">https://xxxxxxxx.supabase.co</code><br>
+          • <strong>anon public key</strong>: começa com <code class="inline">eyJhbGci...</code>
+        </div>
+      </div>
+    </div>
+    <div class="doc-step">
+      <div class="doc-step-num">5</div>
+      <div class="doc-step-body">
+        <div class="doc-step-title">Colar no app: Config → Supabase → Conectar</div>
+        <div class="doc-step-desc">O status fica verde ao conectar. O app migra automaticamente do localStorage para o banco.</div>
+      </div>
+    </div>
+  </div>
+
+  <h3 class="doc-h3">Configurações recomendadas no Supabase</h3>
+  <table class="doc-table">
+    <thead><tr><th>Configuração</th><th>Valor recomendado</th><th>Onde</th></tr></thead>
+    <tbody>
+      <tr><td>Email confirmation</td><td>Desabilitado (para facilitar onboarding)</td><td>Auth → Settings → Email</td></tr>
+      <tr><td>Password min length</td><td>8 caracteres</td><td>Auth → Settings → Password</td></tr>
+      <tr><td>JWT expiry</td><td>3600 segundos (1 hora)</td><td>Auth → Settings → JWT</td></tr>
+      <tr><td>RLS</td><td>Ativo em todas as tabelas ✓</td><td>Já configurado pelo SQL</td></tr>
+    </tbody>
+  </table>
+
+  <!-- ANTHROPIC -->
+  <h2 class="doc-h2" id="anthropic">🤖 2. API Key Anthropic</h2>
+  <p class="doc-p">Usada para o reconhecimento de formulários por foto (Claude Vision). Cada empresa pode ter sua própria chave — ou você pode gerenciar centralmente.</p>
+
+  <div class="doc-steps">
+    <div class="doc-step">
+      <div class="doc-step-num">1</div>
+      <div class="doc-step-body">
+        <div class="doc-step-title">Criar conta em <code class="inline">console.anthropic.com</code></div>
+        <div class="doc-step-desc">Conta Business ou Team recomendada para uso comercial. O plano Free tem limites de uso.</div>
+      </div>
+    </div>
+    <div class="doc-step">
+      <div class="doc-step-num">2</div>
+      <div class="doc-step-body">
+        <div class="doc-step-title">API Keys → Create Key</div>
+        <div class="doc-step-desc">Nome: <code class="inline">produzai-producao</code>. Copie a chave gerada (começa com <code class="inline">sk-ant-api03-</code>). Ela não fica visível novamente depois.</div>
+      </div>
+    </div>
+    <div class="doc-step">
+      <div class="doc-step-num">3</div>
+      <div class="doc-step-body">
+        <div class="doc-step-title">Definir onde a chave fica</div>
+        <div class="doc-step-desc">
+          <strong>Opção A (SaaS):</strong> Cada empresa cadastra sua própria chave em Config → API Key. Cada uma paga diretamente pela Anthropic.<br><br>
+          <strong>Opção B (Gerenciado):</strong> Você mantém uma chave central e embutida no código. Mais simples, mas você absorve os custos de reconhecimento.
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <h3 class="doc-h3">Estimativa de custo por reconhecimento</h3>
+  <table class="doc-table">
+    <thead><tr><th>Formulário</th><th>Tokens (aprox.)</th><th>Custo médio (USD)</th><th>Custo médio (BRL)</th></tr></thead>
+    <tbody>
+      <tr><td>Formulário simples (10 linhas)</td><td>~800 tokens</td><td>~$0,002</td><td>~R$0,01</td></tr>
+      <tr><td>Formulário completo (40 linhas)</td><td>~2.000 tokens</td><td>~$0,006</td><td>~R$0,03</td></tr>
+      <tr><td>100 formulários/mês</td><td>~150.000 tokens</td><td>~$0,45</td><td>~R$2,25</td></tr>
+      <tr><td>1.000 formulários/mês</td><td>~1.500.000 tokens</td><td>~$4,50</td><td>~R$22,50</td></tr>
+    </tbody>
+  </table>
+
+  <!-- VERCEL -->
+  <h2 class="doc-h2" id="vercel">▲ 3. Deploy no Vercel</h2>
+  <p class="doc-p">Hospedagem gratuita com CDN global e SSL automático. O webhook do Stripe roda como Serverless Function.</p>
+
+  <div class="doc-steps">
+    <div class="doc-step">
+      <div class="doc-step-num">1</div>
+      <div class="doc-step-body">
+        <div class="doc-step-title">Criar conta em <code class="inline">vercel.com</code></div>
+        <div class="doc-step-desc">Login com GitHub. O plano Hobby (gratuito) é suficiente para começar.</div>
+      </div>
+    </div>
+    <div class="doc-step">
+      <div class="doc-step-num">2</div>
+      <div class="doc-step-body">
+        <div class="doc-step-title">Add New → Project → Browse → selecionar a pasta</div>
+        <div class="doc-step-desc">Arraste ou selecione a pasta com todos os arquivos do projeto. O Vercel detecta automaticamente como site estático.</div>
+      </div>
+    </div>
+    <div class="doc-step">
+      <div class="doc-step-num">3</div>
+      <div class="doc-step-body">
+        <div class="doc-step-title">Adicionar o webhook como API Route</div>
+        <div class="doc-step-desc">Renomeie <code class="inline">stripe_webhook.js</code> para <code class="inline">api/stripe-webhook.js</code> antes do upload. O Vercel reconhece automaticamente como função serverless.</div>
+      </div>
+    </div>
+    <div class="doc-step">
+      <div class="doc-step-num">4</div>
+      <div class="doc-step-body">
+        <div class="doc-step-title">Configurar variáveis de ambiente</div>
+        <div class="doc-step-desc">Painel Vercel → Settings → Environment Variables. Adicione as variáveis abaixo.</div>
+      </div>
+    </div>
+    <div class="doc-step">
+      <div class="doc-step-num">5</div>
+      <div class="doc-step-body">
+        <div class="doc-step-title">Domínio personalizado (opcional)</div>
+        <div class="doc-step-desc">Settings → Domains → adicione <code class="inline">app.seudominio.com.br</code>. O Vercel provisiona o SSL automaticamente via Let's Encrypt.</div>
+      </div>
+    </div>
+  </div>
+
+  <h3 class="doc-h3">Variáveis de ambiente no Vercel</h3>
+  <div class="env-table">
+    <div class="env-row">
+      <div class="env-key">STRIPE_SECRET_KEY</div>
+      <div class="env-val">sk_live_... (painel Stripe → Developers → API Keys)</div>
+    </div>
+    <div class="env-row">
+      <div class="env-key">STRIPE_WEBHOOK_SECRET</div>
+      <div class="env-val">whsec_... (gerado ao criar o webhook no Stripe)</div>
+    </div>
+    <div class="env-row">
+      <div class="env-key">SUPABASE_URL</div>
+      <div class="env-val">https://xxxxxxxx.supabase.co</div>
+    </div>
+    <div class="env-row">
+      <div class="env-key">SUPABASE_SERVICE_KEY</div>
+      <div class="env-val">eyJ... (Settings → API → service_role key — NÃO a anon key)</div>
+    </div>
+  </div>
+
+  <div class="callout danger">
+    <span class="callout-icon">🚨</span>
+    <div><strong>Atenção:</strong> O webhook usa a <code class="inline">service_role</code> key (não a anon). Essa chave tem acesso total ao banco — nunca exponha no frontend.</div>
+  </div>
+
+  <!-- STRIPE -->
+  <h2 class="doc-h2" id="stripe">💳 4. Configurar Stripe</h2>
+  <p class="doc-p">Gerencia as assinaturas mensais. Os planos são controlados pelo painel Stripe e refletidos automaticamente no banco via webhook.</p>
+
+  <div class="doc-steps">
+    <div class="doc-step">
+      <div class="doc-step-num">1</div>
+      <div class="doc-step-body">
+        <div class="doc-step-title">Criar conta em <code class="inline">stripe.com</code></div>
+        <div class="doc-step-desc">Preencha os dados da sua empresa para habilitar cobranças em produção. Em modo de teste, use as chaves <code class="inline">sk_test_</code>.</div>
+      </div>
+    </div>
+    <div class="doc-step">
+      <div class="doc-step-num">2</div>
+      <div class="doc-step-body">
+        <div class="doc-step-title">Criar os produtos e preços</div>
+        <div class="doc-step-desc">
+          Products → Add product:<br>
+          • <strong>ProduzAI Básico</strong> → R$99/mês (recorrente mensal)<br>
+          • <strong>ProduzAI Profissional</strong> → R$199/mês (recorrente mensal)<br>
+          Copie os <code class="inline">price_id</code> gerados (formato: <code class="inline">price_1ABC...</code>).
+        </div>
+      </div>
+    </div>
+    <div class="doc-step">
+      <div class="doc-step-num">3</div>
+      <div class="doc-step-body">
+        <div class="doc-step-title">Atualizar o mapa de preços em <code class="inline">stripe_webhook.js</code></div>
+        <div class="doc-step-desc">
+          Abra o arquivo e preencha o objeto <code class="inline">PRICE_TO_PLANO</code>:
+          <div class="code-block" style="margin-top:8px">
+            <pre>const PRICE_TO_PLANO = {
+  'price_SEU_ID_BASICO_MENSAL':  'basico',
+  'price_SEU_ID_PRO_MENSAL':     'pro',
+};</pre>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="doc-step">
+      <div class="doc-step-num">4</div>
+      <div class="doc-step-body">
+        <div class="doc-step-title">Configurar o webhook no Stripe</div>
+        <div class="doc-step-desc">
+          Developers → Webhooks → Add endpoint<br>
+          URL: <code class="inline">https://seudominio.vercel.app/api/stripe-webhook</code><br>
+          Eventos a escutar:
+          <code class="inline">customer.subscription.created</code>,
+          <code class="inline">customer.subscription.updated</code>,
+          <code class="inline">customer.subscription.deleted</code>,
+          <code class="inline">checkout.session.completed</code>,
+          <code class="inline">invoice.payment_failed</code>
+        </div>
+      </div>
+    </div>
+    <div class="doc-step">
+      <div class="doc-step-num">5</div>
+      <div class="doc-step-body">
+        <div class="doc-step-title">Atualizar a tabela <code class="inline">planos</code> no Supabase</div>
+        <div class="doc-step-desc">
+          Supabase → Table Editor → planos → edite as linhas:<br>
+          • Preencha <code class="inline">stripe_price_id_mensal</code> com o price_id real<br>
+          • Os botões de assinatura no app ficam ativos automaticamente
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- GERENCIAR PLANOS -->
+  <h2 class="doc-h2" id="planos">💰 Gerenciar planos</h2>
+  <p class="doc-p">Para alterar preços ou features dos planos, você tem dois pontos a atualizar:</p>
+
+  <h3 class="doc-h3">Alterar o preço</h3>
+  <div class="doc-steps">
+    <div class="doc-step">
+      <div class="doc-step-num">1</div>
+      <div class="doc-step-body">
+        <div class="doc-step-title">No Stripe: criar um novo price</div>
+        <div class="doc-step-desc">Não edite o preço existente — o Stripe não permite. Vá em Products → seu produto → Add another price → defina o novo valor.</div>
+      </div>
+    </div>
+    <div class="doc-step">
+      <div class="doc-step-num">2</div>
+      <div class="doc-step-body">
+        <div class="doc-step-title">No Supabase: atualizar a tabela planos</div>
+        <div class="doc-step-desc">Table Editor → planos → edite a linha correspondente: atualize <code class="inline">preco_mensal</code>, <code class="inline">stripe_price_id_mensal</code> com o novo price_id.</div>
+      </div>
+    </div>
+    <div class="doc-step">
+      <div class="doc-step-num">3</div>
+      <div class="doc-step-body">
+        <div class="doc-step-title">No stripe_webhook.js: atualizar o mapa</div>
+        <div class="doc-step-desc">Adicione o novo price_id no objeto <code class="inline">PRICE_TO_PLANO</code> e faça novo deploy no Vercel.</div>
+      </div>
+    </div>
+  </div>
+
+  <h3 class="doc-h3">Alterar features exibidas na tela de preços</h3>
+  <p class="doc-p">No Supabase → Table Editor → planos → coluna <code class="inline">features</code>. É um array JSON. Exemplo:</p>
+  <div class="code-block">
+    <div class="code-block-header">Supabase — tabela planos → coluna features</div>
+    <pre>["Até 5 usuários", "Dashboard completo", "Relatórios PDF", "Suporte por email"]</pre>
+  </div>
+  <p class="doc-p">Salve e o app exibe automaticamente as novas features na próxima vez que a tela de preços for aberta.</p>
+
+  <!-- GERENCIAR CLIENTES -->
+  <h2 class="doc-h2" id="clientes">👥 Gerenciar clientes</h2>
+  <h3 class="doc-h3">Ver todas as empresas cadastradas</h3>
+  <p class="doc-p">Supabase → Table Editor → tabela <code class="inline">empresas</code>. Mostra todas as empresas com plano, data de trial, status da assinatura e stripe_customer_id.</p>
+
+  <h3 class="doc-h3">Estender o trial de um cliente</h3>
+  <p class="doc-p">Supabase → SQL Editor → execute:</p>
+  <div class="code-block">
+    <div class="code-block-header">SQL — estender trial</div>
+    <pre>UPDATE empresas
+SET trial_expira = now() + interval '7 days'
+WHERE email = 'cliente@empresa.com';</pre>
+  </div>
+
+  <h3 class="doc-h3">Bloquear/desbloquear acesso</h3>
+  <div class="code-block">
+    <div class="code-block-header">SQL — bloquear empresa</div>
+    <pre>UPDATE empresas
+SET assinatura_ativa = false
+WHERE email = 'cliente@empresa.com';</pre>
+  </div>
+
+  <!-- CUSTOS -->
+  <h2 class="doc-h2" id="custos">📊 Estimativa de custos operacionais</h2>
+  <table class="doc-table">
+    <thead><tr><th>Serviço</th><th>0–10 clientes</th><th>10–50 clientes</th><th>50–200 clientes</th></tr></thead>
+    <tbody>
+      <tr><td>Vercel</td><td>R$0 (Free)</td><td>R$0 (Free)</td><td>~R$100/mês (Pro)</td></tr>
+      <tr><td>Supabase</td><td>R$0 (Free)</td><td>~R$125/mês (Pro)</td><td>~R$125/mês (Pro)</td></tr>
+      <tr><td>Stripe</td><td>2.9% + R$0,60/tx</td><td>2.9% + R$0,60/tx</td><td>2.9% + R$0,60/tx</td></tr>
+      <tr><td>Anthropic</td><td>~R$5–20/mês</td><td>~R$50–150/mês</td><td>~R$200–600/mês</td></tr>
+      <tr><td><strong>Total estimado</strong></td><td><strong>R$5–20/mês</strong></td><td><strong>R$175–275/mês</strong></td><td><strong>R$425–825/mês</strong></td></tr>
+    </tbody>
+  </table>
+
+  <div class="callout tip">
+    <span class="callout-icon">💡</span>
+    <div><strong>Margem:</strong> Com 30 clientes no plano Pro (R$199), a receita mensal é R$5.970. Custo operacional estimado: ~R$200–300. Margem bruta: ~95%.</div>
+  </div>
+
+  <!-- TROUBLESHOOTING -->
+  <h2 class="doc-h2" id="troubleshoot">🔍 Troubleshooting</h2>
+
+  <h3 class="doc-h3">App não conecta ao Supabase</h3>
+  <p class="doc-p">Verifique se a URL e a anon key estão corretas em Config → Supabase. A URL deve começar com <code class="inline">https://</code> e terminar com <code class="inline">.supabase.co</code>. Confirme que o SQL de setup foi executado sem erros.</p>
+
+  <h3 class="doc-h3">Reconhecimento por foto não funciona</h3>
+  <p class="doc-p">Confirme que a API Key está salva em Config → API Key Anthropic. Verifique no console do navegador (F12) se há erro de CORS ou de autenticação. A chave deve ter créditos disponíveis na conta Anthropic.</p>
+
+  <h3 class="doc-h3">Webhook do Stripe não ativa o plano</h3>
+  <p class="doc-p">No painel Stripe → Developers → Webhooks → seu endpoint → verifique os eventos recentes. Erros 401 indicam problema com <code class="inline">STRIPE_WEBHOOK_SECRET</code>. Erros 500 indicam problema no código do webhook — verifique os logs no Vercel (Functions → Logs).</p>
+
+  <h3 class="doc-h3">Cliente cadastrado mas não aparece como empresa no Supabase</h3>
+  <p class="doc-p">A função RPC <code class="inline">criar_empresa_e_admin</code> pode ter falhado. No Supabase → Authentication → Users, veja se o usuário foi criado. Se sim, execute manualmente:</p>
+  <div class="code-block">
+    <div class="code-block-header">SQL — criar empresa manualmente</div>
+    <pre>SELECT criar_empresa_e_admin(
+  'Nome da Empresa',
+  'email@empresa.com',
+  'Nome do Usuário'
+);</pre>
+  </div>
+
+  <div style="margin-top:48px;padding:24px;background:rgba(245,158,11,.06);border:1px solid rgba(245,158,11,.2);border-radius:12px;text-align:center">
+    <div style="font-size:18px;margin-bottom:8px">🔧</div>
+    <div style="font-family:'Syne',sans-serif;font-size:16px;font-weight:700;margin-bottom:4px">Dúvidas técnicas?</div>
+    <div style="font-size:13px;color:var(--muted)">Este é um documento vivo — atualize conforme o projeto evolui.</div>
+  </div>
+
+</main>
+</div>
+
+<script>
+function ir(id){
+  const el=document.getElementById(id);
+  if(el) el.scrollIntoView({behavior:'smooth',block:'start'});
+  document.querySelectorAll('.sidebar-link').forEach(l=>l.classList.remove('active'));
+  event?.target?.closest('.sidebar-link')?.classList.add('active');
+}
+
+function updateProgress(){
+  const boxes=document.querySelectorAll('#checklist input[type=checkbox]');
+  const done=[...boxes].filter(b=>b.checked).length;
+  const pct=Math.round(done/boxes.length*100);
+  document.getElementById('progressFill').style.width=pct+'%';
+  document.getElementById('progressLabel').textContent=`${done} de ${boxes.length} etapas`;
+  document.getElementById('progressPct').textContent=pct+'%';
+  boxes.forEach(b=>{ b.closest('.check-item').classList.toggle('done',b.checked); });
+  // save state
+  const state=[...boxes].map(b=>b.checked);
+  localStorage.setItem('admin_checklist',JSON.stringify(state));
+}
+
+// Restore checklist state
+window.addEventListener('DOMContentLoaded',()=>{
+  const saved=JSON.parse(localStorage.getItem('admin_checklist')||'[]');
+  const boxes=document.querySelectorAll('#checklist input[type=checkbox]');
+  boxes.forEach((b,i)=>{ if(saved[i]) b.checked=true; });
+  updateProgress();
+});
+
+// Highlight active section on scroll
+window.addEventListener('scroll',()=>{
+  let current='';
+  document.querySelectorAll('[id]').forEach(s=>{
+    if(window.scrollY>=s.offsetTop-100) current=s.id;
+  });
+  document.querySelectorAll('.sidebar-link').forEach(l=>{
+    l.classList.remove('active');
+    if(l.getAttribute('onclick')?.includes(current)) l.classList.add('active');
+  });
+});
+</script>
+</body>
+</html>

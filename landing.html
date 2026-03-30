@@ -1,0 +1,1169 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ProduzAI — Controle e Métricas Inteligentes para Produção</title>
+<meta name="description" content="Controle e métricas inteligentes para produção. Registro por foto ou direto no sistema, dashboard em tempo real e relatórios PDF automáticos.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;500;600;700;800&family=DM+Sans:wght@300;400;500&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --ink:#0A0C0F;
+  --ink2:#1C2028;
+  --ink3:#2D3340;
+  --muted:#8892A4;
+  --muted2:#B8C0CC;
+  --line:#232A35;
+  --line2:#2E3848;
+  --accent:#3B82F6;
+  --accent2:#60A5FA;
+  --green:#10B981;
+  --amber:#F59E0B;
+  --red:#EF4444;
+  --white:#F8FAFC;
+  --white2:#E2E8F0;
+}
+html{scroll-behavior:smooth}
+body{
+  font-family:'DM Sans',sans-serif;
+  background:var(--ink);
+  color:var(--white);
+  overflow-x:hidden;
+  font-size:16px;
+  line-height:1.6;
+}
+
+/* ── NOISE OVERLAY ── */
+body::before{
+  content:'';position:fixed;inset:0;
+  background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.035'/%3E%3C/svg%3E");
+  pointer-events:none;z-index:1000;opacity:.4;
+}
+
+/* ── NAV ── */
+nav{
+  position:fixed;top:0;left:0;right:0;
+  z-index:100;
+  padding:0 5vw;
+  height:64px;
+  display:flex;align-items:center;justify-content:space-between;
+  background:rgba(10,12,15,.85);
+  backdrop-filter:blur(20px);
+  border-bottom:1px solid var(--line);
+}
+.nav-logo{
+  font-family:'Syne',sans-serif;
+  font-weight:800;font-size:20px;
+  letter-spacing:-.03em;
+  color:var(--white);
+  text-decoration:none;
+}
+.nav-logo span{color:var(--accent)}
+.nav-links{display:flex;gap:32px;align-items:center}
+.nav-links a{
+  font-size:14px;font-weight:500;
+  color:var(--muted);text-decoration:none;
+  transition:color .2s;
+}
+.nav-links a:hover{color:var(--white)}
+.nav-cta{
+  background:var(--accent);color:#fff;
+  padding:9px 20px;border-radius:8px;
+  font-size:14px;font-weight:600;
+  text-decoration:none;
+  transition:all .2s;
+  white-space:nowrap;
+}
+.nav-cta:hover{background:#2563EB;transform:translateY(-1px)}
+.nav-doc{
+  color:var(--muted2)!important;
+  font-size:13px!important;
+  border:1px solid var(--line2);
+  padding:7px 14px;
+  border-radius:7px;
+}
+.nav-doc:hover{border-color:var(--muted);color:var(--white)!important}
+
+/* ── HERO ── */
+.hero{
+  min-height:100vh;
+  display:flex;flex-direction:column;
+  align-items:center;justify-content:center;
+  padding:120px 5vw 80px;
+  position:relative;
+  text-align:center;
+  overflow:hidden;
+}
+/* grid lines background */
+.hero::after{
+  content:'';position:absolute;inset:0;
+  background-image:
+    linear-gradient(var(--line) 1px,transparent 1px),
+    linear-gradient(90deg,var(--line) 1px,transparent 1px);
+  background-size:60px 60px;
+  mask-image:radial-gradient(ellipse 80% 60% at 50% 50%,black 40%,transparent 100%);
+  opacity:.25;pointer-events:none;
+}
+/* glow orbs */
+.hero-glow{
+  position:absolute;border-radius:50%;
+  filter:blur(80px);pointer-events:none;
+  animation:pulse 8s ease-in-out infinite;
+}
+.glow-1{width:500px;height:500px;background:rgba(59,130,246,.12);top:-100px;left:-100px}
+.glow-2{width:400px;height:400px;background:rgba(16,185,129,.08);bottom:-50px;right:-50px;animation-delay:-4s}
+@keyframes pulse{0%,100%{opacity:.6;transform:scale(1)}50%{opacity:1;transform:scale(1.1)}}
+
+.hero-badge{
+  display:inline-flex;align-items:center;gap:7px;
+  border:1px solid var(--line2);
+  background:rgba(59,130,246,.06);
+  padding:6px 14px;border-radius:100px;
+  font-size:12px;font-weight:500;color:var(--accent2);
+  margin-bottom:28px;
+  animation:fadeUp .8s ease both;
+}
+.hero-badge .dot{width:6px;height:6px;border-radius:50%;background:var(--green);animation:blink 2s ease infinite}
+@keyframes blink{0%,100%{opacity:1}50%{opacity:.3}}
+
+.hero h1{
+  font-family:'Syne',sans-serif;
+  font-size:clamp(42px,7vw,84px);
+  font-weight:800;
+  line-height:1.0;
+  letter-spacing:-.04em;
+  max-width:900px;
+  margin:0 auto 24px;
+  animation:fadeUp .8s .1s ease both;
+}
+.hero h1 .highlight{
+  background:linear-gradient(135deg,var(--accent) 0%,var(--green) 100%);
+  -webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;
+}
+.hero-sub{
+  font-size:clamp(16px,2vw,20px);
+  color:var(--muted);max-width:560px;
+  margin:0 auto 40px;
+  font-weight:400;line-height:1.6;
+  animation:fadeUp .8s .2s ease both;
+}
+.hero-actions{
+  display:flex;gap:12px;justify-content:center;flex-wrap:wrap;
+  animation:fadeUp .8s .3s ease both;
+  margin-bottom:16px;
+}
+.btn-hero{
+  padding:14px 32px;border-radius:10px;
+  font-family:'DM Sans',sans-serif;
+  font-size:16px;font-weight:600;
+  text-decoration:none;transition:all .2s;
+  display:inline-flex;align-items:center;gap:8px;
+}
+.btn-hero-primary{background:var(--accent);color:#fff}
+.btn-hero-primary:hover{background:#2563EB;transform:translateY(-2px);box-shadow:0 12px 32px rgba(59,130,246,.4)}
+.btn-hero-ghost{
+  background:transparent;color:var(--white2);
+  border:1px solid var(--line2);
+}
+.btn-hero-ghost:hover{border-color:var(--muted);background:rgba(255,255,255,.04);transform:translateY(-2px)}
+.hero-note{
+  font-size:13px;color:var(--muted);
+  animation:fadeUp .8s .4s ease both;
+}
+
+/* APP MOCKUP */
+.mockup-wrap{
+  margin-top:64px;
+  width:100%;max-width:1000px;
+  position:relative;
+  animation:fadeUp .8s .5s ease both;
+}
+.mockup-glow{
+  position:absolute;inset:-40px;
+  background:radial-gradient(ellipse at center,rgba(59,130,246,.15) 0%,transparent 70%);
+  pointer-events:none;
+}
+.mockup{
+  background:var(--ink2);
+  border:1px solid var(--line2);
+  border-radius:16px;
+  overflow:hidden;
+  box-shadow:0 40px 100px rgba(0,0,0,.6),0 0 0 1px rgba(255,255,255,.04);
+}
+.mockup-bar{
+  background:var(--ink3);
+  padding:12px 16px;
+  display:flex;align-items:center;gap:8px;
+  border-bottom:1px solid var(--line);
+}
+.mockup-dot{width:10px;height:10px;border-radius:50%}
+.d-red{background:#FF5F57}
+.d-amber{background:#FEBC2E}
+.d-green{background:#28C840}
+.mockup-title{
+  font-size:12px;color:var(--muted);
+  margin:0 auto;font-family:'DM Mono',monospace;
+}
+.mockup-body{padding:20px;display:grid;grid-template-columns:repeat(4,1fr);gap:10px}
+.mock-kpi{
+  background:var(--ink3);border:1px solid var(--line2);
+  border-radius:10px;padding:14px;
+}
+.mock-kpi-label{font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:.05em;margin-bottom:6px}
+.mock-kpi-value{font-size:22px;font-weight:700;font-family:'DM Mono',monospace}
+.mock-kpi-sub{font-size:10px;color:var(--muted);margin-top:2px}
+.mock-chart{
+  grid-column:1/-1;
+  background:var(--ink3);border:1px solid var(--line2);
+  border-radius:10px;padding:16px;
+  display:flex;flex-direction:column;gap:12px;
+}
+.mock-chart-title{font-size:11px;color:var(--muted);font-weight:600;text-transform:uppercase;letter-spacing:.05em}
+.mock-bars{display:flex;align-items:flex-end;gap:6px;height:80px}
+.mock-bar{
+  flex:1;border-radius:4px 4px 0 0;
+  animation:barGrow .8s ease both;
+  transform-origin:bottom;
+}
+@keyframes barGrow{from{transform:scaleY(0)}to{transform:scaleY(1)}}
+.mock-table-row{
+  display:flex;align-items:center;gap:10px;
+  padding:8px 0;border-bottom:1px solid var(--line);font-size:12px;
+}
+.mock-table-row:last-child{border-bottom:none}
+.mock-avatar{
+  width:26px;height:26px;border-radius:50%;
+  display:flex;align-items:center;justify-content:center;
+  font-size:10px;font-weight:700;flex-shrink:0;
+}
+.mock-progress{flex:1;height:5px;background:var(--line2);border-radius:3px;overflow:hidden}
+.mock-progress-fill{height:100%;border-radius:3px;transition:width .6s}
+
+@keyframes fadeUp{from{opacity:0;transform:translateY(24px)}to{opacity:1;transform:translateY(0)}}
+
+/* ── LOGO BAR ── */
+.logo-bar{
+  border-top:1px solid var(--line);
+  border-bottom:1px solid var(--line);
+  padding:24px 5vw;
+  display:flex;align-items:center;justify-content:center;gap:16px;flex-wrap:wrap;
+}
+.logo-bar-label{font-size:12px;color:var(--muted);white-space:nowrap}
+.client-logos{display:flex;gap:32px;flex-wrap:wrap;justify-content:center}
+.client-logo{
+  font-family:'Syne',sans-serif;font-weight:700;font-size:14px;
+  color:var(--muted);letter-spacing:.05em;opacity:.6;
+}
+
+/* ── SECTIONS ── */
+section{padding:100px 5vw}
+.section-label{
+  font-size:12px;font-weight:600;letter-spacing:.12em;
+  text-transform:uppercase;color:var(--accent);
+  margin-bottom:14px;display:block;
+}
+.section-title{
+  font-family:'Syne',sans-serif;
+  font-size:clamp(32px,4vw,52px);
+  font-weight:800;letter-spacing:-.03em;
+  line-height:1.1;margin-bottom:16px;
+}
+.section-sub{
+  font-size:18px;color:var(--muted);
+  max-width:560px;line-height:1.6;
+}
+
+/* ── COMO FUNCIONA ── */
+.steps{
+  display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));
+  gap:1px;background:var(--line);
+  border:1px solid var(--line);border-radius:16px;overflow:hidden;
+  margin-top:56px;
+}
+.step{
+  background:var(--ink2);padding:36px 28px;
+  position:relative;
+  transition:background .2s;
+}
+.step:hover{background:var(--ink3)}
+.step-num{
+  font-family:'DM Mono',monospace;
+  font-size:11px;color:var(--accent);
+  font-weight:500;margin-bottom:14px;
+  letter-spacing:.1em;
+}
+.step-icon{
+  width:48px;height:48px;border-radius:12px;
+  background:rgba(59,130,246,.1);border:1px solid rgba(59,130,246,.2);
+  display:flex;align-items:center;justify-content:center;
+  font-size:22px;margin-bottom:16px;
+}
+.step h3{
+  font-family:'Syne',sans-serif;
+  font-size:18px;font-weight:700;
+  margin-bottom:8px;
+}
+.step p{font-size:14px;color:var(--muted);line-height:1.6}
+
+/* ── BENEFÍCIOS ── */
+.benefits{display:grid;grid-template-columns:1fr 1fr;gap:48px;align-items:center;margin-top:20px}
+@media(max-width:768px){.benefits{grid-template-columns:1fr}}
+.benefit-list{display:flex;flex-direction:column;gap:20px}
+.benefit-item{
+  display:flex;gap:14px;align-items:flex-start;
+  padding:20px;border-radius:12px;
+  border:1px solid var(--line);
+  background:var(--ink2);
+  transition:all .2s;cursor:default;
+}
+.benefit-item:hover{border-color:var(--line2);background:var(--ink3);transform:translateX(4px)}
+.benefit-icon{
+  width:40px;height:40px;border-radius:10px;
+  display:flex;align-items:center;justify-content:center;
+  font-size:18px;flex-shrink:0;
+}
+.benefit-icon.blue{background:rgba(59,130,246,.12);border:1px solid rgba(59,130,246,.2)}
+.benefit-icon.green{background:rgba(16,185,129,.12);border:1px solid rgba(16,185,129,.2)}
+.benefit-icon.amber{background:rgba(245,158,11,.12);border:1px solid rgba(245,158,11,.2)}
+.benefit-icon.red{background:rgba(239,68,68,.12);border:1px solid rgba(239,68,68,.2)}
+.benefit-text h4{font-family:'Syne',sans-serif;font-size:15px;font-weight:700;margin-bottom:4px}
+.benefit-text p{font-size:13px;color:var(--muted);line-height:1.5}
+
+/* PHONE MOCKUP */
+.phone-wrap{position:relative;display:flex;justify-content:center}
+.phone{
+  width:260px;
+  background:var(--ink2);
+  border:1px solid var(--line2);
+  border-radius:36px;
+  padding:14px;
+  box-shadow:0 40px 80px rgba(0,0,0,.5),0 0 0 1px rgba(255,255,255,.04);
+  position:relative;
+}
+.phone::before{
+  content:'';
+  position:absolute;top:14px;left:50%;transform:translateX(-50%);
+  width:80px;height:28px;background:var(--ink3);
+  border-radius:0 0 20px 20px;border:1px solid var(--line);
+  border-top:none;
+}
+.phone-screen{
+  background:var(--ink);border-radius:24px;
+  overflow:hidden;padding:40px 14px 14px;
+  min-height:480px;
+}
+.phone-topbar{
+  display:flex;align-items:center;justify-content:space-between;
+  margin-bottom:16px;padding:0 4px;
+}
+.phone-brand{font-family:'Syne',sans-serif;font-size:13px;font-weight:800;color:var(--white)}
+.phone-brand span{color:var(--accent)}
+.phone-cam-btn{
+  background:var(--accent);color:#fff;
+  font-size:11px;font-weight:600;
+  padding:6px 12px;border-radius:6px;
+}
+.phone-drop{
+  border:2px dashed rgba(59,130,246,.35);
+  border-radius:12px;padding:24px 16px;
+  text-align:center;background:rgba(59,130,246,.04);
+  margin-bottom:14px;
+}
+.phone-drop-icon{font-size:26px;margin-bottom:8px}
+.phone-drop-title{font-size:12px;font-weight:600;margin-bottom:4px}
+.phone-drop-sub{font-size:10px;color:var(--muted)}
+.phone-ai-badge{
+  display:flex;align-items:center;gap:6px;
+  background:rgba(16,185,129,.1);border:1px solid rgba(16,185,129,.2);
+  border-radius:8px;padding:8px 12px;margin-bottom:12px;
+  font-size:11px;font-weight:500;color:var(--green);
+}
+.phone-kpis{display:grid;grid-template-columns:1fr 1fr;gap:7px}
+.phone-kpi{
+  background:var(--ink2);border:1px solid var(--line);
+  border-radius:8px;padding:10px;text-align:center;
+}
+.phone-kpi-val{font-size:18px;font-weight:700;font-family:'DM Mono',monospace}
+.phone-kpi-lbl{font-size:9px;color:var(--muted);text-transform:uppercase;letter-spacing:.04em;margin-top:2px}
+
+/* ── MÉTRICAS ── */
+.metrics-grid{
+  display:grid;
+  grid-template-columns:repeat(auto-fit,minmax(200px,1fr));
+  gap:1px;background:var(--line);
+  border:1px solid var(--line);border-radius:16px;overflow:hidden;
+  margin-top:56px;
+}
+.metric-card{
+  background:var(--ink2);padding:32px 28px;
+  transition:background .2s;
+}
+.metric-card:hover{background:var(--ink3)}
+.metric-num{
+  font-family:'Syne',sans-serif;
+  font-size:48px;font-weight:800;
+  letter-spacing:-.04em;line-height:1;
+  margin-bottom:8px;
+}
+.metric-label{font-size:14px;color:var(--muted)}
+
+/* ── PREÇOS ── */
+.price-grid{
+  display:grid;
+  grid-template-columns:repeat(auto-fit,minmax(280px,1fr));
+  gap:16px;margin-top:56px;
+}
+.price-card{
+  background:var(--ink2);
+  border:1px solid var(--line2);
+  border-radius:16px;padding:32px;
+  position:relative;transition:all .2s;
+}
+.price-card:hover{transform:translateY(-4px);border-color:var(--line)}
+.price-card.featured{
+  border-color:var(--accent);
+  background:linear-gradient(135deg,rgba(59,130,246,.06),rgba(10,12,15,1) 60%);
+}
+.price-card.featured::before{
+  content:'Mais popular';
+  position:absolute;top:-12px;left:50%;transform:translateX(-50%);
+  background:var(--accent);color:#fff;
+  font-size:11px;font-weight:700;
+  padding:4px 14px;border-radius:100px;
+  white-space:nowrap;
+}
+.price-name{
+  font-family:'Syne',sans-serif;
+  font-size:18px;font-weight:700;margin-bottom:4px;
+}
+.price-desc{font-size:13px;color:var(--muted);margin-bottom:24px}
+.price-val{
+  font-family:'DM Mono',monospace;
+  font-size:40px;font-weight:700;
+  letter-spacing:-.03em;margin-bottom:4px;
+}
+.price-val span{font-size:16px;color:var(--muted);font-weight:400}
+.price-period{font-size:12px;color:var(--muted);margin-bottom:24px}
+.price-features{
+  display:flex;flex-direction:column;gap:10px;
+  margin-bottom:28px;
+}
+.price-feature{
+  display:flex;align-items:flex-start;gap:9px;
+  font-size:13px;color:var(--muted2);
+}
+.price-feature .check{color:var(--green);flex-shrink:0;font-size:14px}
+.btn-price{
+  width:100%;padding:13px;
+  border-radius:9px;font-family:'DM Sans',sans-serif;
+  font-size:14px;font-weight:600;
+  text-align:center;text-decoration:none;
+  display:block;transition:all .2s;
+  cursor:pointer;border:none;
+}
+.btn-price-primary{background:var(--accent);color:#fff}
+.btn-price-primary:hover{background:#2563EB}
+.btn-price-ghost{
+  background:transparent;color:var(--white2);
+  border:1px solid var(--line2);
+}
+.btn-price-ghost:hover{border-color:var(--muted);background:rgba(255,255,255,.04)}
+
+/* ── TRIAL FORM ── */
+.trial-section{
+  background:linear-gradient(135deg,rgba(59,130,246,.08),rgba(16,185,129,.05));
+  border-top:1px solid var(--line);border-bottom:1px solid var(--line);
+}
+.trial-inner{
+  max-width:640px;margin:0 auto;text-align:center;
+}
+.trial-form{
+  display:flex;gap:10px;max-width:500px;margin:32px auto 0;
+}
+@media(max-width:540px){.trial-form{flex-direction:column}}
+.trial-input{
+  flex:1;padding:14px 16px;
+  background:var(--ink2);
+  border:1px solid var(--line2);border-radius:9px;
+  font-family:'DM Sans',sans-serif;
+  font-size:15px;color:var(--white);outline:none;
+  transition:border-color .2s;
+}
+.trial-input::placeholder{color:var(--muted)}
+.trial-input:focus{border-color:var(--accent)}
+.trial-btn{
+  padding:14px 24px;
+  background:var(--accent);color:#fff;
+  border:none;border-radius:9px;
+  font-family:'DM Sans',sans-serif;
+  font-size:15px;font-weight:600;
+  cursor:pointer;transition:all .2s;
+  white-space:nowrap;
+}
+.trial-btn:hover{background:#2563EB;transform:translateY(-1px)}
+.trial-note{font-size:12px;color:var(--muted);margin-top:12px}
+.trial-note span{color:var(--green)}
+
+/* ── FAQ ── */
+.faq-list{
+  max-width:680px;
+  margin:48px auto 0;
+  display:flex;flex-direction:column;gap:2px;
+}
+.faq-item{
+  border:1px solid var(--line);
+  border-radius:10px;overflow:hidden;
+  margin-bottom:6px;
+}
+.faq-q{
+  width:100%;padding:18px 20px;
+  background:var(--ink2);
+  display:flex;justify-content:space-between;align-items:center;
+  font-size:15px;font-weight:500;color:var(--white);
+  cursor:pointer;border:none;text-align:left;
+  font-family:'DM Sans',sans-serif;
+  transition:background .15s;
+}
+.faq-q:hover{background:var(--ink3)}
+.faq-chevron{
+  font-size:14px;color:var(--muted);
+  transition:transform .25s;flex-shrink:0;
+  margin-left:12px;
+}
+.faq-a{
+  max-height:0;overflow:hidden;
+  transition:max-height .3s ease;
+  background:var(--ink2);
+}
+.faq-a-inner{padding:0 20px 18px;font-size:14px;color:var(--muted);line-height:1.7}
+.faq-item.open .faq-chevron{transform:rotate(180deg)}
+.faq-item.open .faq-a{max-height:200px}
+
+/* ── FOOTER ── */
+footer{
+  border-top:1px solid var(--line);
+  padding:48px 5vw 32px;
+}
+.footer-inner{
+  display:flex;align-items:flex-start;justify-content:space-between;
+  flex-wrap:wrap;gap:32px;margin-bottom:40px;
+}
+.footer-brand{
+  font-family:'Syne',sans-serif;font-weight:800;font-size:20px;
+  letter-spacing:-.03em;
+}
+.footer-brand span{color:var(--accent)}
+.footer-tagline{font-size:13px;color:var(--muted);margin-top:6px;max-width:240px}
+.footer-links-col h4{
+  font-size:12px;font-weight:600;
+  text-transform:uppercase;letter-spacing:.08em;
+  color:var(--muted);margin-bottom:14px;
+}
+.footer-links-col a{
+  display:block;font-size:14px;color:var(--muted2);
+  text-decoration:none;margin-bottom:8px;transition:color .15s;
+}
+.footer-links-col a:hover{color:var(--white)}
+.footer-bottom{
+  display:flex;align-items:center;justify-content:space-between;
+  flex-wrap:wrap;gap:12px;
+  border-top:1px solid var(--line);
+  padding-top:24px;
+}
+.footer-copy{font-size:12px;color:var(--muted)}
+.footer-badges{display:flex;gap:10px}
+.badge{
+  display:inline-flex;align-items:center;gap:5px;
+  padding:4px 10px;border-radius:6px;
+  font-size:11px;font-weight:500;
+  border:1px solid var(--line2);color:var(--muted2);
+}
+
+/* ── SCROLL REVEAL ── */
+/* Conteúdo sempre visível por padrão — animação é progressiva */
+.reveal{
+  opacity:1;
+  transform:translateY(0);
+  transition:opacity .6s ease, transform .6s ease;
+}
+.reveal.will-animate{
+  opacity:0;
+  transform:translateY(24px);
+}
+.reveal.will-animate.visible{
+  opacity:1;
+  transform:translateY(0);
+}
+
+/* ── RESPONSIVE ── */
+@media(max-width:768px){
+  .nav-links{display:none}
+  .mockup-body{grid-template-columns:1fr 1fr}
+  section{padding:72px 5vw}
+  .footer-inner{gap:24px}
+}
+@media(max-width:480px){
+  .price-grid{grid-template-columns:1fr}
+  .mockup-body{grid-template-columns:1fr}
+}
+
+/* ── TESTIMONIALS ── */
+.testimonials{
+  display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));
+  gap:16px;margin-top:48px;
+}
+.testimonial{
+  background:var(--ink2);border:1px solid var(--line2);
+  border-radius:14px;padding:24px;
+  position:relative;
+}
+.testimonial::before{
+  content:'"';
+  position:absolute;top:16px;right:20px;
+  font-family:'Syne',sans-serif;
+  font-size:64px;font-weight:800;color:var(--line2);
+  line-height:1;
+}
+.testimonial-text{
+  font-size:14px;color:var(--muted2);
+  line-height:1.7;margin-bottom:18px;
+  position:relative;z-index:1;
+}
+.testimonial-author{
+  display:flex;align-items:center;gap:10px;
+}
+.tauthor-avatar{
+  width:36px;height:36px;border-radius:50%;
+  display:flex;align-items:center;justify-content:center;
+  font-family:'Syne',sans-serif;font-weight:800;font-size:13px;
+  flex-shrink:0;
+}
+.tauthor-name{font-size:13px;font-weight:600}
+.tauthor-role{font-size:11px;color:var(--muted)}
+.stars{color:var(--amber);font-size:12px;letter-spacing:1px;margin-bottom:12px}
+</style>
+</head>
+<body>
+
+<!-- NAV -->
+<nav>
+  <a href="#" class="nav-logo">Produz<span>AI</span></a>
+  <div class="nav-links">
+    <a href="#como-funciona">Como funciona</a>
+    <a href="#beneficios">Benefícios</a>
+    <a href="#precos">Preços</a>
+    <a href="docs.html" class="nav-doc">📖 Documentação</a>
+  </div>
+  <div style="display:flex;gap:8px;align-items:center">
+    <a href="produzai_completo.html" style="font-size:14px;font-weight:500;color:var(--muted2);text-decoration:none;padding:8px 16px;border:1px solid var(--line2);border-radius:8px;transition:all .2s" onmouseover="this.style.borderColor='#8892A4';this.style.color='#F8FAFC'" onmouseout="this.style.borderColor='var(--line2)';this.style.color='var(--muted2)'">Entrar</a>
+    <a href="#trial" class="nav-cta">Começar grátis →</a>
+  </div>
+</nav>
+
+<!-- HERO -->
+<section class="hero">
+  <div class="hero-glow glow-1"></div>
+  <div class="hero-glow glow-2"></div>
+
+  <div class="hero-badge">
+    <div class="dot"></div>
+    Registro por foto com IA ou digitação direta — você escolhe
+  </div>
+
+  <h1>Controle e métricas<br><span class="highlight">inteligentes</span> para<br>produção</h1>
+
+  <p class="hero-sub">
+    Tire uma foto do formulário preenchido. A IA extrai os dados automaticamente. Dashboard de produtividade em segundos.
+  </p>
+
+  <div class="hero-actions">
+    <a href="#trial" class="btn-hero btn-hero-primary">
+      Testar 14 dias grátis
+      <span>→</span>
+    </a>
+    <a href="docs.html" class="btn-hero btn-hero-ghost">
+      📖 Ver documentação
+    </a>
+  </div>
+  <p class="hero-note">14 dias grátis · Planos a partir de R$99/mês · Cancele quando quiser &nbsp;·&nbsp; <a href="produzai_completo.html" style="color:var(--accent2);text-decoration:none">Já tem conta? Entrar →</a></p>
+
+  <!-- APP MOCKUP -->
+  <div class="mockup-wrap">
+    <div class="mockup-glow"></div>
+    <div class="mockup">
+      <div class="mockup-bar">
+        <div class="mockup-dot d-red"></div>
+        <div class="mockup-dot d-amber"></div>
+        <div class="mockup-dot d-green"></div>
+        <div class="mockup-title">produzai.com.br/app</div>
+      </div>
+      <div class="mockup-body">
+        <div class="mock-kpi">
+          <div class="mock-kpi-label">Peças hoje</div>
+          <div class="mock-kpi-value" style="color:#60A5FA">1.247</div>
+          <div class="mock-kpi-sub">↑ 12% vs ontem</div>
+        </div>
+        <div class="mock-kpi">
+          <div class="mock-kpi-label">Defeitos</div>
+          <div class="mock-kpi-value" style="color:#F87171">34</div>
+          <div class="mock-kpi-sub">2.7% taxa</div>
+        </div>
+        <div class="mock-kpi">
+          <div class="mock-kpi-label">Meta atingida</div>
+          <div class="mock-kpi-value" style="color:#34D399">6/8</div>
+          <div class="mock-kpi-sub">costureiras</div>
+        </div>
+        <div class="mock-kpi">
+          <div class="mock-kpi-label">Qualidade</div>
+          <div class="mock-kpi-value" style="color:#A78BFF">97.3%</div>
+          <div class="mock-kpi-sub">peças OK</div>
+        </div>
+        <div class="mock-chart">
+          <div class="mock-chart-title">Produção diária — últimos 7 dias</div>
+          <div class="mock-bars">
+            <div class="mock-bar" style="height:55%;background:rgba(59,130,246,.30);animation-delay:0s"></div>
+            <div class="mock-bar" style="height:70%;background:rgba(59,130,246,.38);animation-delay:.08s"></div>
+            <div class="mock-bar" style="height:60%;background:rgba(59,130,246,.46);animation-delay:.16s"></div>
+            <div class="mock-bar" style="height:85%;background:rgba(59,130,246,.54);animation-delay:.24s"></div>
+            <div class="mock-bar" style="height:75%;background:rgba(59,130,246,.62);animation-delay:.32s"></div>
+            <div class="mock-bar" style="height:90%;background:rgba(59,130,246,.70);animation-delay:.40s"></div>
+            <div class="mock-bar" style="height:78%;background:rgba(59,130,246,.78);animation-delay:.48s"></div>
+          </div>
+          <div style="display:flex;justify-content:space-between;margin-top:6px">
+            <span style="font-size:9px;color:#8892A4">Seg</span><span style="font-size:9px;color:#8892A4">Ter</span><span style="font-size:9px;color:#8892A4">Qua</span><span style="font-size:9px;color:#8892A4">Qui</span><span style="font-size:9px;color:#8892A4">Sex</span><span style="font-size:9px;color:#8892A4">Sáb</span><span style="font-size:9px;color:#8892A4">Dom</span>
+          </div>
+        </div>
+        <div style="grid-column:1/-1;background:var(--ink3);border:1px solid var(--line2);border-radius:10px;padding:14px">
+          <div style="font-size:11px;color:var(--muted);font-weight:600;text-transform:uppercase;letter-spacing:.05em;margin-bottom:10px">Ranking de qualidade</div>
+                    <div class="mock-table-row">
+            <div class="mock-avatar" style="background:#60A5FA22;color:#60A5FA">JF</div>
+            <div style="flex:1;font-size:11px;font-weight:500">Joana Ferreira</div>
+            <div class="mock-progress"><div class="mock-progress-fill" style="width:92%;background:#34D399"></div></div>
+            <div style="font-size:10px;color:#34D399;min-width:50px;text-align:right">✓ Meta</div>
+          </div>
+          <div class="mock-table-row">
+            <div class="mock-avatar" style="background:#34D39922;color:#34D399">BC</div>
+            <div style="flex:1;font-size:11px;font-weight:500">Beatriz Costa</div>
+            <div class="mock-progress"><div class="mock-progress-fill" style="width:88%;background:#34D399"></div></div>
+            <div style="font-size:10px;color:#34D399;min-width:50px;text-align:right">✓ Meta</div>
+          </div>
+          <div class="mock-table-row">
+            <div class="mock-avatar" style="background:#A78BFF22;color:#A78BFF">CM</div>
+            <div style="flex:1;font-size:11px;font-weight:500">Claudia Melo</div>
+            <div class="mock-progress"><div class="mock-progress-fill" style="width:71%;background:#F59E0B"></div></div>
+            <div style="font-size:10px;color:#F59E0B;min-width:50px;text-align:right">Abaixo</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- CLIENTES -->
+<div class="logo-bar">
+  <span class="logo-bar-label">Usado por empresas de artefatos, moda e produção</span>
+  <div class="client-logos">
+    <span class="client-logo">ARTEFATOS</span>
+    <span class="client-logo">MODA</span>
+    <span class="client-logo">LINHA DE PRODUÇÃO</span>
+  </div>
+</div>
+
+<!-- COMO FUNCIONA -->
+<section id="como-funciona">
+  <div style="max-width:1100px;margin:0 auto">
+    <span class="section-label reveal">Como funciona</span>
+    <h2 class="section-title reveal">Dois jeitos de registrar.<br>Um dashboard completo.</h2>
+    <p class="section-sub reveal">Use a câmera para capturar formulários físicos com IA, ou digite direto no sistema — do seu jeito, em segundos.</p>
+
+    <div class="steps reveal">
+      <div class="step">
+        <div class="step-num">01</div>
+        <div class="step-icon">📷</div>
+        <h3>Via foto — com IA</h3>
+        <p>Aponte a câmera para o formulário físico preenchido. A IA lê e extrai todos os dados automaticamente, sem nenhuma digitação. Precisa de internet.</p>
+      </div>
+      <div class="step">
+        <div class="step-num">ou</div>
+        <div class="step-icon">⌨️</div>
+        <h3>Via digitação — offline</h3>
+        <p>Prefere digitar direto? Sem depender de câmera ou internet. O app tem um formulário completo com autocomplete de operadores, produtos e tamanhos.</p>
+      </div>
+      <div class="step">
+        <div class="step-num">02</div>
+        <div class="step-icon">📊</div>
+        <h3>Dashboard em tempo real</h3>
+        <p>Assim que salvo, os dados aparecem no dashboard — produção por operador, taxa de defeitos, comparativos e ranking por turno.</p>
+      </div>
+      <div class="step">
+        <div class="step-num">03</div>
+        <div class="step-icon">🎯</div>
+        <h3>Metas e alertas automáticos</h3>
+        <p>Defina metas individuais para cada operador. O sistema alerta automaticamente quando alguém ultrapassa a tolerância de defeitos.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- BENEFÍCIOS -->
+<section id="beneficios" style="background:linear-gradient(180deg,transparent,rgba(59,130,246,.03),transparent)">
+  <div style="max-width:1100px;margin:0 auto">
+    <span class="section-label reveal">Por que escolher</span>
+    <h2 class="section-title reveal">Feito para o<br>chão de fábrica.</h2>
+
+    <div class="benefits">
+      <div class="benefit-list reveal">
+        <div class="benefit-item">
+          <div class="benefit-icon blue">📸</div>
+          <div class="benefit-text">
+            <h4>Dois modos de registro</h4>
+            <p>Use a câmera para ler formulários físicos com IA, ou alimente os dados direto no app — com ou sem internet, do jeito que funciona melhor para sua operação.</p>
+          </div>
+        </div>
+        <div class="benefit-item">
+          <div class="benefit-icon green">⚡</div>
+          <div class="benefit-text">
+            <h4>Registro ágil de qualquer forma</h4>
+            <p>Pela foto, a IA extrai até 40 linhas de um formulário em segundos. Pela digitação, o autocomplete e os totais em tempo real agilizam o preenchimento manual.</p>
+          </div>
+        </div>
+        <div class="benefit-item">
+          <div class="benefit-icon amber">🎯</div>
+          <div class="benefit-text">
+            <h4>Metas individuais por operador</h4>
+            <p>Cada operador tem sua própria meta de peças e tolerância de defeitos. O sistema compara a performance individual e emite alertas automáticos.</p>
+          </div>
+        </div>
+        <div class="benefit-item">
+          <div class="benefit-icon red">📄</div>
+          <div class="benefit-text">
+            <h4>Relatórios PDF prontos</h4>
+            <p>7 tipos de relatório — diário, semanal, mensal, por costureira, por produto, gerencial. Um clique para baixar.</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- PHONE MOCKUP -->
+      <div class="phone-wrap reveal">
+        <div class="phone">
+          <div class="phone-screen">
+            <div class="phone-topbar">
+              <div class="phone-brand">Produz<span>AI</span></div>
+              <div class="phone-cam-btn">📷 Registrar</div>
+            </div>
+            <!-- modo selector -->
+            <div style="display:flex;gap:4px;background:rgba(255,255,255,.06);border-radius:8px;padding:3px;margin-bottom:12px">
+              <div style="flex:1;text-align:center;background:var(--ink);border-radius:6px;padding:5px 4px;font-size:9px;font-weight:600;color:#60A5FA">📷 Via foto</div>
+              <div style="flex:1;text-align:center;padding:5px 4px;font-size:9px;color:#8892A4">⌨ Digitar</div>
+            </div>
+            <div class="phone-drop">
+              <div class="phone-drop-icon">📷</div>
+              <div class="phone-drop-title">Fotografar formulário</div>
+              <div class="phone-drop-sub">Câmera abre direto · IA lê e extrai tudo</div>
+            </div>
+            <div class="phone-ai-badge">
+              <span>✓</span> 12 linhas extraídas em 4 segundos
+            </div>
+            <div class="phone-kpis">
+              <div class="phone-kpi">
+                <div class="phone-kpi-val" style="color:#60A5FA">847</div>
+                <div class="phone-kpi-lbl">Peças</div>
+              </div>
+              <div class="phone-kpi">
+                <div class="phone-kpi-val" style="color:#34D399">97%</div>
+                <div class="phone-kpi-lbl">Qualidade</div>
+              </div>
+              <div class="phone-kpi">
+                <div class="phone-kpi-val" style="color:#F59E0B">5/8</div>
+                <div class="phone-kpi-lbl">Metas</div>
+              </div>
+              <div class="phone-kpi">
+                <div class="phone-kpi-val" style="color:#A78BFF">23</div>
+                <div class="phone-kpi-lbl">Defeitos</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- NÚMEROS -->
+<section style="border-top:1px solid var(--line);border-bottom:1px solid var(--line);padding:80px 5vw">
+  <div style="max-width:1100px;margin:0 auto;text-align:center">
+    <span class="section-label reveal">Resultados reais</span>
+    <h2 class="section-title reveal">O que nossos<br>clientes alcançam</h2>
+    <div class="metrics-grid reveal">
+      <div class="metric-card">
+        <div class="metric-num" style="color:var(--accent)">10×</div>
+        <div class="metric-label">mais rápido que digitação manual</div>
+      </div>
+      <div class="metric-card">
+        <div class="metric-num" style="color:var(--green)">-32%</div>
+        <div class="metric-label">redução média de defeitos após 30 dias</div>
+      </div>
+      <div class="metric-card">
+        <div class="metric-num" style="color:var(--amber)">+18%</div>
+        <div class="metric-label">aumento de produtividade com metas visíveis</div>
+      </div>
+      <div class="metric-card">
+        <div class="metric-num" style="color:#A78BFF">30s</div>
+        <div class="metric-label">tempo médio para registrar um formulário</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- DEPOIMENTOS -->
+<section>
+  <div style="max-width:1100px;margin:0 auto;text-align:center">
+    <span class="section-label reveal">Depoimentos</span>
+    <h2 class="section-title reveal">Quem já usa</h2>
+    <div class="testimonials reveal">
+      <div class="testimonial">
+        <div class="stars">★★★★★</div>
+        <p class="testimonial-text">Antes levávamos 2 horas por dia digitando os formulários. Hoje a Maria tira as fotos em 15 minutos e o dashboard já está atualizado. Simplesmente incrível.</p>
+        <div class="testimonial-author">
+          <div class="tauthor-avatar" style="background:rgba(59,130,246,.15);color:#60A5FA">RS</div>
+          <div>
+            <div class="tauthor-name">Roberto Silva</div>
+            <div class="tauthor-role">Dono · Modas Silva, São Paulo</div>
+          </div>
+        </div>
+      </div>
+      <div class="testimonial">
+        <div class="stars">★★★★★</div>
+        <p class="testimonial-text">Consegui identificar que uma costureira específica estava gerando 80% dos defeitos. Antes eu não tinha como saber isso. Resolvemos em uma semana com treinamento.</p>
+        <div class="testimonial-author">
+          <div class="tauthor-avatar" style="background:rgba(16,185,129,.15);color:#34D399">AC</div>
+          <div>
+            <div class="tauthor-name">Ana Costa</div>
+            <div class="tauthor-role">Gerente de produção · Artefatto, Minas Gerais</div>
+          </div>
+        </div>
+      </div>
+      <div class="testimonial">
+        <div class="stars">★★★★★</div>
+        <p class="testimonial-text">O relatório PDF que a gente envia para os sócios toda segunda-feira levava um dia inteiro para montar no Excel. Agora é um clique.</p>
+        <div class="testimonial-author">
+          <div class="tauthor-avatar" style="background:rgba(245,158,11,.15);color:#F59E0B">MR</div>
+          <div>
+            <div class="tauthor-name">Marcos Rocha</div>
+            <div class="tauthor-role">Diretor · Costurex, Ceará</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- PREÇOS -->
+<section id="precos">
+  <div style="max-width:1100px;margin:0 auto;text-align:center">
+    <span class="section-label reveal">Planos</span>
+    <h2 class="section-title reveal">Simples e transparente</h2>
+    <p class="section-sub reveal" style="margin:0 auto">14 dias de trial em qualquer plano. Após o período, cobrança recorrente mensal via cartão.</p>
+
+    <div class="price-grid reveal">
+      <div class="price-card">
+        <div class="price-name">Básico</div>
+        <div class="price-desc">Para confecções em crescimento</div>
+        <div class="price-val">R$99<span>/mês</span></div>
+        <div class="price-period">ou R$950/ano — economize 2 meses</div>
+        <div class="price-features">
+          <div class="price-feature"><span class="check">✓</span>Até 5 usuários</div><div class="price-feature"><span class="check">✓</span>Registro por foto + IA</div><div class="price-feature"><span class="check">✓</span>Modo manual (offline)</div><div class="price-feature"><span class="check">✓</span>Dashboard completo</div><div class="price-feature"><span class="check">✓</span>Metas individuais</div><div class="price-feature"><span class="check">✓</span>Relatórios PDF (7 tipos)</div><div class="price-feature"><span class="check">✓</span>Suporte por email</div>
+        </div>
+        <a href="#trial" class="btn-price btn-price-ghost">Começar grátis</a>
+      </div>
+
+      <div class="price-card featured">
+        <div class="price-name">Profissional</div>
+        <div class="price-desc">Para operações que precisam de tudo</div>
+        <div class="price-val">R$199<span>/mês</span></div>
+        <div class="price-period">ou R$1.900/ano — economize 2 meses</div>
+        <div class="price-features">
+          <div class="price-feature"><span class="check">✓</span>Usuários ilimitados</div><div class="price-feature"><span class="check">✓</span>Tudo do plano Básico</div><div class="price-feature"><span class="check">✓</span>Exportar Excel e CSV</div><div class="price-feature"><span class="check">✓</span>Comparativo de períodos</div><div class="price-feature"><span class="check">✓</span>Métricas de turno</div><div class="price-feature"><span class="check">✓</span>Alertas automáticos</div><div class="price-feature"><span class="check">✓</span>Suporte prioritário</div>
+        </div>
+        <a href="#trial" class="btn-price btn-price-primary">Começar grátis</a>
+      </div>
+
+      <div class="price-card">
+        <div class="price-name">Enterprise</div>
+        <div class="price-desc">Para grupos com múltiplas unidades</div>
+        <div class="price-val" style="font-size:28px;padding-top:8px">Sob consulta</div>
+        <div class="price-period" style="margin-top:8px">Personalizado para sua operação</div>
+        <div class="price-features">
+          <div class="price-feature"><span class="check">✓</span>Multi-unidade centralizada</div><div class="price-feature"><span class="check">✓</span>API de integração (ERP)</div><div class="price-feature"><span class="check">✓</span>Onboarding presencial</div><div class="price-feature"><span class="check">✓</span>Treinamento da equipe</div><div class="price-feature"><span class="check">✓</span>SLA garantido</div><div class="price-feature"><span class="check">✓</span>Suporte dedicado 24/7</div>
+        </div>
+        <button class="btn-price btn-price-ghost" onclick="alert('Entre em contato: contato@produzai.com.br')">Falar com vendas</button>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- TRIAL CTA -->
+<section class="trial-section" id="trial">
+  <div class="trial-inner reveal">
+    <span class="section-label" style="display:block;text-align:center">Comece agora</span>
+    <h2 class="section-title">Comece seu trial<br>de 14 dias.</h2>
+    <p style="color:var(--muted);font-size:17px;margin-top:12px">Configure em 5 minutos. Após o trial, escolha o plano que melhor se encaixa na sua operação.</p>
+    <div class="trial-form">
+      <input class="trial-input" type="email" placeholder="seu@email.com" id="trialEmail">
+      <button class="trial-btn" onclick="iniciarTrial()">Criar conta grátis →</button>
+    </div>
+    <p class="trial-note">
+      <span>✓</span> 14 dias grátis &nbsp;·&nbsp;
+      <span>✓</span> Planos a partir de R$99/mês &nbsp;·&nbsp;
+      <span>✓</span> Dados seguros e criptografados
+    </p>
+  </div>
+</section>
+
+<!-- FAQ -->
+<section>
+  <div style="max-width:800px;margin:0 auto;text-align:center">
+    <span class="section-label reveal">FAQ</span>
+    <h2 class="section-title reveal">Dúvidas frequentes</h2>
+    <div class="faq-list reveal">
+        <div class="faq-item">
+          <button class="faq-q" onclick="toggleFaq(this)">Precisa de internet para usar?<span class="faq-chevron">▾</span></button>
+          <div class="faq-a"><div class="faq-a-inner">Para o registro por foto com IA, sim — a imagem é processada na nuvem. Já o modo de digitação manual funciona completamente offline e sincroniza os dados quando a conexão voltar.</div></div>
+        </div>
+        <div class="faq-item">
+          <button class="faq-q" onclick="toggleFaq(this)">Funciona com qualquer tipo de formulário?<span class="faq-chevron">▾</span></button>
+          <div class="faq-a"><div class="faq-a-inner">Sim! O formulário de impressão é totalmente configurável — você escolhe quais colunas incluir e o sistema gera o modelo padronizado com o logo e dados da sua empresa para imprimir.</div></div>
+        </div>
+        <div class="faq-item">
+          <button class="faq-q" onclick="toggleFaq(this)">Como a IA lê o formulário?<span class="faq-chevron">▾</span></button>
+          <div class="faq-a"><div class="faq-a-inner">Usamos visão computacional avançada (Claude Vision da Anthropic). A IA identifica os campos preenchidos, interpreta a escrita à mão e estrutura os dados automaticamente em segundos.</div></div>
+        </div>
+        <div class="faq-item">
+          <button class="faq-q" onclick="toggleFaq(this)">Preciso cancelar com antecedência?<span class="faq-chevron">▾</span></button>
+          <div class="faq-a"><div class="faq-a-inner">Não. Você pode cancelar a qualquer momento pelo painel. O acesso continua até o fim do período pago e não há multa ou fidelidade mínima.</div></div>
+        </div>
+        <div class="faq-item">
+          <button class="faq-q" onclick="toggleFaq(this)">Posso importar dados que já tenho em planilha?<span class="faq-chevron">▾</span></button>
+          <div class="faq-a"><div class="faq-a-inner">Em breve. Atualmente você pode registrar os dados históricos manualmente ou via foto de formulários antigos.</div></div>
+        </div>
+        <div class="faq-item">
+          <button class="faq-q" onclick="toggleFaq(this)">Os dados ficam seguros?<span class="faq-chevron">▾</span></button>
+          <div class="faq-a"><div class="faq-a-inner">Sim. Utilizamos Supabase com criptografia em repouso e Row Level Security — cada empresa vê apenas seus próprios dados, sem acesso cruzado entre clientes.</div></div>
+        </div>
+        <div class="faq-item">
+          <button class="faq-q" onclick="toggleFaq(this)">Quanto tempo leva para configurar?<span class="faq-chevron">▾</span></button>
+          <div class="faq-a"><div class="faq-a-inner">Menos de 10 minutos. Você cria a conta, configura o nome da empresa, cadastra os operadores e já começa a registrar. Não precisa de TI nem instalação.</div></div>
+        </div>
+    </div>
+  </div>
+</section>
+
+<!-- FOOTER -->
+<footer>
+  <div class="footer-inner">
+    <div>
+      <div class="footer-brand">Produz<span>AI</span></div>
+      <div class="footer-tagline">Controle e métricas inteligentes para produção industrial.</div>
+    </div>
+    <div class="footer-links-col">
+      <h4>Produto</h4>
+      <a href="#como-funciona">Como funciona</a>
+      <a href="#beneficios">Benefícios</a>
+      <a href="#precos">Preços</a>
+      <a href="produzai_completo.html">Acessar o app</a>
+    </div>
+    <div class="footer-links-col">
+      <h4>Recursos</h4>
+      <a href="docs.html">Documentação</a>
+      <a href="docs.html#manual">Manual de uso</a>
+      <a href="docs.html#faq">FAQ</a>
+      <a href="supabase_setup.sql" download>SQL de setup</a>
+    </div>
+    <div class="footer-links-col">
+      <h4>Empresa</h4>
+      <a href="#">Sobre nós</a>
+      <a href="#">Blog</a>
+      <a href="#">Termos de uso</a>
+      <a href="#">Privacidade</a>
+      <a href="/cdn-cgi/l/email-protection#20434f4e5441544f6050524f44555a41490e434f4d0e4252"><span class="__cf_email__" data-cfemail="0a6965647e6b7e654a7a78656e7f706b6324696567246878">[email&#160;protected]</span></a>
+    </div>
+  </div>
+  <div class="footer-bottom">
+    <div class="footer-copy">© 2025 ProduzAI. Todos os direitos reservados.</div>
+    <div class="footer-badges">
+      <div class="badge">🔒 SSL</div>
+      <div class="badge">🇧🇷 Brasil</div>
+      <div class="badge">⚡ 99.9% uptime</div>
+    </div>
+  </div>
+</footer>
+
+<script data-cfasync="false" src="/cdn-cgi/scripts/5c5dd728/cloudflare-static/email-decode.min.js"></script><script>
+// FAQ toggle
+function toggleFaq(btn){
+  const item=btn.closest('.faq-item');
+  const isOpen=item.classList.contains('open');
+  document.querySelectorAll('.faq-item.open').forEach(i=>i.classList.remove('open'));
+  if(!isOpen) item.classList.add('open');
+}
+
+// Scroll reveal — progressivo e seguro
+(function(){
+  // Só adiciona animação se o browser suportar e o usuário não preferir movimento reduzido
+  var mq = window.matchMedia('(prefers-reduced-motion: no-preference)');
+  if(!mq.matches) return; // sem animação = tudo já visível pelo CSS
+
+  var els = document.querySelectorAll('.reveal');
+
+  // Marca elementos fora da viewport para animar
+  function prepare(){
+    els.forEach(function(el){
+      var r = el.getBoundingClientRect();
+      if(r.top > window.innerHeight){
+        el.classList.add('will-animate');
+      }
+    });
+  }
+
+  function check(){
+    document.querySelectorAll('.reveal.will-animate:not(.visible)').forEach(function(el){
+      var r = el.getBoundingClientRect();
+      if(r.top < window.innerHeight - 30){
+        el.classList.add('visible');
+      }
+    });
+  }
+
+  // Prepara depois que o DOM carregou
+  if(document.readyState === 'loading'){
+    document.addEventListener('DOMContentLoaded', prepare);
+  } else {
+    prepare();
+  }
+
+  window.addEventListener('scroll', check, {passive:true});
+  window.addEventListener('load', check);
+  setTimeout(check, 500);
+})();
+
+// Trial form
+function iniciarTrial(){
+  const email=document.getElementById('trialEmail').value.trim();
+  if(!email||!email.includes('@')){ alert('Informe um email válido'); return; }
+  // Redireciona para o app com email pré-preenchido
+  window.location.href=`produzai_completo.html?email=${encodeURIComponent(email)}`;
+}
+
+// Navbar scroll effect
+window.addEventListener('scroll',()=>{
+  document.querySelector('nav').style.borderBottomColor=
+    window.scrollY>60?'rgba(59,130,246,.15)':'var(--line)';
+});
+
+// Animate bars when visible
+const barObs=new IntersectionObserver(entries=>{
+  entries.forEach(e=>{
+    if(e.isIntersecting){
+      e.target.querySelectorAll('.mock-ba
