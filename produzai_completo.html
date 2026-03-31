@@ -34,6 +34,42 @@
   --teal:#00D4B4;--teal-bg:rgba(0,212,180,.12);
   --r:10px;--rl:14px;
 }
+/* TEMA CLARO */
+body.light{
+  --bg:#F0F2F5;
+  --surf:#FFFFFF;
+  --surf2:#F5F7FA;
+  --surf3:#EBEEF3;
+  --b:#D8DEE8;
+  --b2:#C4CDD9;
+  --t:#1A2030;
+  --t2:#4A5568;
+  --t3:#8896A8;
+  --accent-bg:rgba(77,142,255,.10);
+  --green-bg:rgba(46,204,138,.10);
+  --red-bg:rgba(255,91,91,.10);
+  --amber-bg:rgba(255,184,48,.10);
+  --purple-bg:rgba(167,139,255,.10);
+}
+body.light .topbar{background:#FFFFFF;border-bottom:1px solid var(--b)}
+body.light .login-wrap{background:#F0F2F5}
+body.light .login-box{box-shadow:0 8px 40px rgba(0,0,0,.12)}
+body.light .nav-mobile{background:#FFFFFF;border-top:1px solid var(--b)}
+body.light .mobile-menu{background:#FFFFFF}
+/* Toggle tema */
+.theme-toggle{
+  width:36px;height:20px;border-radius:10px;
+  background:var(--surf3);border:1px solid var(--b);
+  cursor:pointer;position:relative;transition:background .2s;
+  flex-shrink:0;
+}
+.theme-toggle::after{
+  content:'';position:absolute;top:2px;left:2px;
+  width:14px;height:14px;border-radius:50%;
+  background:var(--t2);transition:transform .2s, background .2s;
+}
+body.light .theme-toggle{background:#4D8EFF}
+body.light .theme-toggle::after{transform:translateX(16px);background:#fff}
 body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--t);min-height:100vh;font-size:14px;line-height:1.5}
 
 /* TOPBAR */
@@ -470,6 +506,7 @@ tr:hover td{background:var(--surf2)}
     <button class="nav-pill" onclick="showPage('ajuda')">❓ Ajuda</button>
   </div>
   <div class="topbar-right">
+    <div class="theme-toggle" onclick="toggleTheme()" title="Alternar tema" id="themeToggle"></div>
     <div class="company-badge" onclick="showPage('config')">
       <div class="co-avatar" id="coAvatar">CS</div>
       <span id="coName" class="co-name-text">Confecções Silva</span>
@@ -667,6 +704,7 @@ tr:hover td{background:var(--surf2)}
       <button class="sec-tab" onclick="dashTab('evolucao',this)">Evolução</button>
       <button class="sec-tab" onclick="dashTab('turno',this)">Turno</button>
       <button class="sec-tab" onclick="dashTab('comparativo',this)">Comparativo</button>
+    <button class="sec-tab" onclick="dashTab('ranking',this)">🏆 Ranking</button>
       <button class="sec-tab" onclick="dashTab('auxiliar',this)">Auxiliares</button>
     </div>
     <div id="dash-costureira">
@@ -702,6 +740,13 @@ tr:hover td{background:var(--surf2)}
     <div id="dash-evolucao" style="display:none">
       <div class="chart-card" style="margin-bottom:12px"><div class="chart-title">Produção diária (peças)</div><div class="chart-wrap"><canvas id="cEvolProd"></canvas></div></div>
       <div class="chart-card"><div class="chart-title">Taxa de defeitos diária (%)</div><div class="chart-wrap"><canvas id="cEvolDef"></canvas></div></div>
+    </div>
+    <div id="dash-ranking" style="display:none">
+      <div style="margin-bottom:16px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px">
+        <div style="font-size:13px;font-weight:600">Ranking de produtividade por operador</div>
+        <div style="font-size:11px;color:var(--t3)">% de atingimento da meta individual no período</div>
+      </div>
+      <div id="compOperadores"></div>
     </div>
     <div id="dash-auxiliar" style="display:none">
       <div class="charts-2">
@@ -1505,6 +1550,7 @@ function entrarNoApp(){
   updateCompany();
   renderAll();
   renderTrialBanner();
+  verificarTrialExpirando();
 }
 
 function renderTrialBanner(){
@@ -1601,6 +1647,86 @@ function traduzirErroAuth(msg){
   if(msg.includes('already registered')) return 'Este email já está cadastrado';
   if(msg.includes('Password should')) return 'A senha precisa ter ao menos 8 caracteres';
   return msg;
+}
+
+// ── TEMA CLARO/ESCURO ─────────────────────────────────────
+function toggleTheme(){
+  const isLight = document.body.classList.toggle('light');
+  localStorage.setItem('produzai_theme', isLight ? 'light' : 'dark');
+}
+function initTheme(){
+  const saved = localStorage.getItem('produzai_theme');
+  if(saved === 'light') document.body.classList.add('light');
+}
+initTheme();
+
+// ── COMPARATIVO ENTRE OPERADORES ──────────────────────────
+function renderComparativoOperadores(){
+  const cont = g('compOperadores'); if(!cont) return;
+  const period = gv('dashPeriod')||'today';
+  const recs = filterRecs(period);
+  const lines = getLines(recs);
+
+  // Agrupa por costureira
+  const map = {};
+  lines.forEach(l=>{
+    const num = l.num_costureira||'?';
+    const pessoa = pessoas.find(p=>p.tipo==='costureira'&&p.num===num);
+    const nome = pessoa ? pessoa.nome : 'Nº '+num;
+    if(!map[num]) map[num]={nome, pecas:0, defeitos:0, meta:getMetaCost(num), tol:getTolCost(num)};
+    map[num].pecas += Number(l.qtd_conferida)||0;
+    map[num].defeitos += Number(l.qtd_defeitos)||0;
+  });
+
+  const sorted = Object.values(map).sort((a,b)=>b.pecas-a.pecas);
+  if(!sorted.length){ cont.innerHTML='<div style="color:var(--t3);font-size:13px;text-align:center;padding:20px">Sem dados no período</div>'; return; }
+
+  const maxPecas = Math.max(...sorted.map(o=>o.pecas), 1);
+
+  cont.innerHTML = sorted.map((o,i)=>{
+    const pct = o.meta > 0 ? Math.round((o.pecas/o.meta)*100) : 0;
+    const taxaDef = o.pecas > 0 ? ((o.defeitos/o.pecas)*100).toFixed(1) : 0;
+    const atingiu = pct >= 100;
+    const corPct = atingiu ? 'var(--green)' : pct >= 70 ? 'var(--amber)' : 'var(--red)';
+    const barW = Math.round((o.pecas/maxPecas)*100);
+    const medalha = i===0?'🥇':i===1?'🥈':i===2?'🥉':'';
+    return `<div style="background:var(--surf2);border:1px solid var(--b);border-radius:var(--r);padding:14px;margin-bottom:8px">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px">
+        <div style="display:flex;align-items:center;gap:8px">
+          <div style="font-size:18px">${medalha||'<span style="font-size:12px;color:var(--t3);font-weight:600">#'+(i+1)+'</span>'}</div>
+          <div>
+            <div style="font-size:13px;font-weight:600">${o.nome}</div>
+            <div style="font-size:11px;color:var(--t3)">${o.pecas} peças · ${o.defeitos} defeitos · ${taxaDef}% def.</div>
+          </div>
+        </div>
+        <div style="text-align:right">
+          <div style="font-size:18px;font-weight:700;color:${corPct}">${pct}%</div>
+          <div style="font-size:10px;color:var(--t3)">da meta (${o.meta} pç)</div>
+        </div>
+      </div>
+      <div style="background:var(--surf3);border-radius:4px;height:6px;overflow:hidden">
+        <div style="height:100%;border-radius:4px;background:${corPct};width:${barW}%;transition:width .5s ease"></div>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+// ── NOTIFICAÇÃO TRIAL EXPIRANDO ────────────────────────────
+function verificarTrialExpirando(){
+  if(!empresa.plano==='trial' || !empresa.trial_expira) return;
+  const diff = Math.ceil((new Date(empresa.trial_expira)-new Date())/864e5);
+  if(diff <= 3 && diff > 0){
+    // Mostrar banner de aviso
+    const aviso = document.getElementById('trialAviso') || (() => {
+      const el = document.createElement('div');
+      el.id = 'trialAviso';
+      el.style.cssText = 'background:linear-gradient(135deg,#F59E0B,#EF4444);color:#fff;text-align:center;padding:10px 16px;font-size:13px;font-weight:500;position:sticky;top:56px;z-index:190;display:flex;align-items:center;justify-content:center;gap:12px';
+      const dias_str = diff > 1 ? diff + ' dias' : '1 dia';
+      el.innerHTML = '<span>⚠ Seu trial expira em <strong>' + dias_str + '</strong>!</span><button onclick="carregarPlanosGrid();showAuth(String.fromCharCode(116,114,105,97,108))" style="background:rgba(255,255,255,.25);border:1px solid rgba(255,255,255,.4);color:#fff;padding:4px 12px;border-radius:6px;cursor:pointer;font-size:12px;font-weight:600">Ver planos</button>';
+      document.getElementById('appShell').insertBefore(el, document.getElementById('appShell').firstChild.nextSibling);
+      return el;
+    })();
+  }
 }
 
 function entrarDemo(){
@@ -2076,7 +2202,8 @@ function renderMetas(){
 // ── DASHBOARD ────────────────────────────────────────────
 function renderAll(){ renderDash(); renderHistPage(); renderConfig(); populateDashCost(); loadSavedLogo(); renderListaProdutos(); registrarServiceWorker(); }
 function dashTab(name,el){
-  ['costureira','qualidade','produto','evolucao','turno','comparativo','auxiliar'].forEach(t=>g('dash-'+t).style.display=t===name?'block':'none');
+  ['costureira','qualidade','produto','evolucao','turno','comparativo','ranking','auxiliar'].forEach(t=>g('dash-'+t).style.display=t===name?'block':'none');
+  if(name==='ranking') renderComparativoOperadores();
   document.querySelectorAll('.sec-tab').forEach(b=>b.classList.remove('active')); el.classList.add('active');
   destroyCharts(); renderDash();
 }
@@ -2343,6 +2470,36 @@ function executarPDF(){
   // footer
   const pages=doc.getNumberOfPages();
   for(let p=1;p<=pages;p++){ doc.setPage(p); doc.setFillColor(240,237,230); doc.rect(0,285,W,12,'F'); doc.setFontSize(7); doc.setFont('helvetica','normal'); doc.setTextColor(120,120,120); doc.text('ProduzAI — '+empresa+' — '+meta.title,M,291); doc.text('Página '+p+' de '+pages,W-M,291,{align:'right'}); }
+
+  // ── GRÁFICO DE PRODUÇÃO ──────────────────────────────────
+  const chartEntries=Object.entries(byName).slice(0,12);
+  if(chartEntries.length>0){
+    doc.addPage();
+    let cy=M;
+    doc.setFont('helvetica','bold'); doc.setFontSize(12); doc.setTextColor(0,0,0);
+    doc.text('Grafico de Producao por Operador',M,cy+6); cy+=14;
+    const barH=8; const barGap=4; const labelW=45; const barMaxW=cW-labelW-25;
+    const maxVal=Math.max(...chartEntries.map(([,v])=>v.pecas),1);
+    doc.setFontSize(7);
+    chartEntries.forEach(([nome,v])=>{
+      const pct=Math.round((v.pecas/maxVal)*barMaxW);
+      const metaN=getMetaCost(v.num||'');
+      const atingiu=metaN>0&&v.pecas>=metaN;
+      doc.setFont('helvetica','normal'); doc.setTextColor(40,40,40);
+      doc.text(nome.substring(0,20),M,cy+barH-1);
+      if(atingiu){doc.setFillColor(46,204,138);}else{doc.setFillColor(255,91,91);}
+      doc.roundedRect(M+labelW,cy,Math.max(pct,3),barH,1,1,'F');
+      doc.setTextColor(80,80,80);
+      doc.text(v.pecas+' pcs'+(metaN>0?' / meta '+metaN:''),M+labelW+Math.max(pct,3)+3,cy+barH-1);
+      cy+=barH+barGap;
+    });
+    // legenda
+    cy+=4;
+    doc.setFontSize(8);
+    doc.setFillColor(46,204,138); doc.rect(M,cy,5,5,'F'); doc.setTextColor(40,40,40); doc.text('Atingiu a meta',M+8,cy+4);
+    doc.setFillColor(255,91,91); doc.rect(M+45,cy,5,5,'F'); doc.text('Abaixo da meta',M+53,cy+4);
+  }
+
   doc.save(meta.title.replace(/\s+/g,'_')+'_'+new Date().toISOString().split('T')[0]+'.pdf');
   toast('PDF baixado!');
 }
