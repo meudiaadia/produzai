@@ -1781,13 +1781,10 @@ JSON de sucesso (retorne APENAS este JSON, sem texto extra):
 Se algum campo estiver em branco no formulário, use "" ou 0. Extraia TODAS as linhas preenchidas.`;
 
   try{
-    const res=await fetch('https://api.anthropic.com/v1/messages',{
+    const res=await fetch('/api/analisar',{
       method:'POST',
-      headers:{'Content-Type':'application/json','x-api-key':key,'anthropic-version':'2023-06-01','anthropic-dangerous-client-side-keys':'true'},
-      body:JSON.stringify({model:'claude-opus-4-5',max_tokens:2000,messages:[{role:'user',content:[
-        {type:'image',source:{type:'base64',media_type:'image/jpeg',data:imgB64}},
-        {type:'text',text:prompt}
-      ]}]})
+      headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({image:imgB64, prompt})
     });
     const data=await res.json();
     if(data.error) throw new Error(data.error.message);
