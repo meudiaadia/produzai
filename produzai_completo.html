@@ -374,7 +374,7 @@ tr:hover td{background:var(--surf2)}
 <!-- ══ AUTH PAGES ════════════════════════════════════════ -->
 
 <!-- LOGIN -->
-<div class="login-wrap" id="loginPage">
+<div class="login-wrap" id="loginPage" style="display:none">
   <div class="login-box">
     <div class="login-brand">
       <div class="name">Produz<span>AI</span></div>
@@ -1255,7 +1255,25 @@ if(usandoSupabase()){
 }
 
 // Restaura sessão ao carregar a página
-window.addEventListener('load', restaurarSessao);
+window.addEventListener('load', async ()=>{
+  if(!usandoSupabase()){
+    // Sem Supabase — mostra login direto
+    g('loginPage').style.display='flex';
+    return;
+  }
+  try{
+    const {data:{session}}=await _sb.auth.getSession();
+    if(session){
+      currentUser=session.user;
+      await carregarDadosEmpresa();
+      verificarTrialEPlano();
+    } else {
+      g('loginPage').style.display='flex';
+    }
+  }catch(e){
+    g('loginPage').style.display='flex';
+  }
+});
 
 // ── STATE ─────────────────────────────────────────────────
 let records  = JSON.parse(localStorage.getItem('produzai_v3')||'[]');
