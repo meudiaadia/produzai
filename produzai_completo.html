@@ -1225,10 +1225,37 @@ function initSupabase(){
   if(!SUPA_URL.includes('supabase.co') && !SUPA_URL.includes('supabase.io')) return false;
   if(SUPA_KEY.length < 20) return false;
   try{ _sb=window.supabase.createClient(SUPA_URL,SUPA_KEY); return true; }
-  catch(e){ supabase=null; return false; }
+  catch(e){ _sb=null; return false; }
 }
 initSupabase();
 const usandoSupabase = () => !!_sb;
+
+// ── RESTAURAR SESSÃO AUTOMATICAMENTE ─────────────────────
+async function restaurarSessao(){
+  if(!usandoSupabase()) return;
+  try{
+    const {data:{session}}=await _sb.auth.getSession();
+    if(session){
+      currentUser=session.user;
+      await carregarDadosEmpresa();
+      verificarTrialEPlano();
+    }
+  }catch(e){ console.log('Sem sessão ativa'); }
+}
+
+// Escuta mudanças de auth (login/logout automático)
+if(usandoSupabase()){
+  _sb.auth.onAuthStateChange(async (event, session)=>{
+    if(event==='SIGNED_IN' && session){
+      currentUser=session.user;
+    } else if(event==='SIGNED_OUT'){
+      currentUser=null;
+    }
+  });
+}
+
+// Restaura sessão ao carregar a página
+window.addEventListener('load', restaurarSessao);
 
 // ── STATE ─────────────────────────────────────────────────
 let records  = JSON.parse(localStorage.getItem('produzai_v3')||'[]');
