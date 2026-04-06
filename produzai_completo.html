@@ -276,11 +276,26 @@ tr:hover td{background:var(--surf2)}
 .drop-zone{border:2px dashed var(--b2);border-radius:var(--rl);padding:48px 20px;text-align:center;cursor:pointer;transition:all .2s;background:var(--surf);position:relative}
 .drop-zone:hover,.drop-zone.drag{border-color:var(--accent);background:var(--accent-bg)}
 .drop-zone input{position:absolute;inset:0;opacity:0;cursor:pointer}
+/* Upload buttons mobile */
+.upload-btns-mobile{display:none;gap:12px}
+.upload-btn-big{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:24px 16px;background:var(--surf);border:2px solid var(--b);border-radius:var(--rl);cursor:pointer;transition:all .2s;font-family:'DM Sans',sans-serif;color:var(--t)}
+.upload-btn-big:active{background:var(--surf2);border-color:var(--accent);transform:scale(.97)}
+.desktop-only{display:block}
+@media(max-width:768px){
+  .upload-btns-mobile{display:flex!important}
+  .desktop-only{display:none!important}
+}
 .drop-icon{width:52px;height:52px;border-radius:50%;background:var(--accent-bg);border:1px solid rgba(77,142,255,.3);display:flex;align-items:center;justify-content:center;margin:0 auto 14px;font-size:22px}
 .preview-box{display:none;margin-top:16px;border:1px solid var(--b);border-radius:var(--rl);overflow:hidden;background:var(--surf)}
 .preview-box.show{display:block}
 .preview-box img{width:100%;max-height:320px;object-fit:contain;background:var(--surf2);display:block}
 .preview-actions{padding:12px 14px;border-top:1px solid var(--b);display:flex;gap:8px;align-items:center}
+.preview-box.show ~ .preview-actions-fixed,
+.preview-actions-fixed{display:none}
+@media(max-width:768px){
+  .preview-actions{display:none}
+  .preview-box.show + .preview-actions-fixed{display:flex!important;position:fixed;bottom:calc(56px + env(safe-area-inset-bottom));left:0;right:0;padding:10px 16px;background:var(--surf);border-top:1px solid var(--b);gap:8px;z-index:250}
+}
 
 /* FORM FIELDS */
 .review-meta{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:14px}
@@ -586,13 +601,33 @@ tr:hover td{background:var(--surf2)}
 
     <!-- FOTO MODE -->
     <div id="mode-foto">
-      <div class="drop-zone" id="dropZone" ondragover="event.preventDefault();this.classList.add('drag')" ondragleave="this.classList.remove('drag')" ondrop="handleDrop(event)">
-        <input type="file" accept="image/*" capture="environment" onchange="handleFile(this.files[0])">
-        <input type="file" accept="image/*" id="galleryInput" style="display:none" onchange="handleFile(this.files[0])">
-        <div class="drop-icon">📷</div>
-        <div style="font-size:16px;font-weight:600;margin-bottom:6px">Fotografar formulário</div>
-        <div style="font-size:13px;color:var(--t2);margin-bottom:14px">Aponte a câmera para o formulário preenchido.<br>A IA extrai os dados automaticamente.</div>
-        <button class="btn btn-ghost btn-sm" onclick="event.stopPropagation();g('galleryInput').click()" style="font-size:12px">🖼 Escolher da galeria</button>
+      <!-- Input câmera (mobile - abre câmera direta) -->
+      <input type="file" accept="image/*" capture="environment" id="cameraInput" style="display:none" onchange="handleFile(this.files[0])">
+      <!-- Input galeria (mobile/desktop - abre galeria) -->
+      <input type="file" accept="image/*" id="galleryInput" style="display:none" onchange="handleFile(this.files[0])">
+
+      <!-- Botões de registro - mobile first -->
+      <div id="uploadBtns">
+        <!-- MOBILE: dois botões grandes -->
+        <div class="upload-btns-mobile">
+          <button class="upload-btn-big" onclick="g('cameraInput').click()">
+            <span style="font-size:36px">📷</span>
+            <span style="font-size:15px;font-weight:600;margin-top:6px">Fotografar</span>
+            <span style="font-size:11px;color:var(--t3)">Abre a câmera</span>
+          </button>
+          <button class="upload-btn-big" onclick="g('galleryInput').click()">
+            <span style="font-size:36px">🖼</span>
+            <span style="font-size:15px;font-weight:600;margin-top:6px">Galeria</span>
+            <span style="font-size:11px;color:var(--t3)">Escolher foto</span>
+          </button>
+        </div>
+        <!-- DESKTOP: drop zone -->
+        <div class="drop-zone desktop-only" id="dropZone" ondragover="event.preventDefault();this.classList.add('drag')" ondragleave="this.classList.remove('drag')" ondrop="handleDrop(event)" onclick="g('galleryInput').click()">
+          <div class="drop-icon">📷</div>
+          <div style="font-size:16px;font-weight:600;margin-bottom:6px">Fotografar ou arrastar formulário</div>
+          <div style="font-size:13px;color:var(--t2);margin-bottom:14px">Clique para selecionar ou arraste a imagem aqui</div>
+          <button class="btn btn-ghost btn-sm" onclick="event.stopPropagation();g('cameraInput').click()" style="font-size:12px">📷 Câmera</button>
+        </div>
       </div>
       <div class="preview-box" id="previewBox">
         <img id="previewImg" src="" alt="">
@@ -603,6 +638,14 @@ tr:hover td{background:var(--surf2)}
           </button>
           <button class="btn btn-ghost" onclick="resetUpload()">Trocar foto</button>
         </div>
+      </div>
+      <!-- Botões fixos no mobile após foto selecionada -->
+      <div class="preview-actions-fixed" id="previewActionsFixed" style="display:none">
+        <button class="btn btn-primary" style="flex:1;justify-content:center" onclick="analyzeImage()">
+          <div class="spinner" id="spinner2"></div>
+          <span id="analyzeTxt2">📊 Analisar com IA</span>
+        </button>
+        <button class="btn btn-ghost" onclick="resetUpload()">Trocar</button>
       </div>
     </div>
 
@@ -1850,8 +1893,32 @@ function fecharMobileMenu(){
 
 // ── UPLOAD ───────────────────────────────────────────────
 function handleDrop(e){ e.preventDefault(); g('dropZone').classList.remove('drag'); const f=e.dataTransfer.files[0]; if(f&&f.type.startsWith('image/')) handleFile(f); }
-function handleFile(file){ if(!file)return; const r=new FileReader(); r.onload=ev=>{ imgB64=ev.target.result.split(',')[1]; g('previewImg').src=ev.target.result; g('previewBox').classList.add('show'); }; r.readAsDataURL(file); }
-function resetUpload(){ imgB64=null; g('previewBox').classList.remove('show'); }
+function handleFile(file){
+  if(!file)return;
+  const r=new FileReader();
+  r.onload=ev=>{
+    imgB64=ev.target.result.split(',')[1];
+    g('previewImg').src=ev.target.result;
+    g('previewBox').classList.add('show');
+    // Esconde os botões de upload e mostra botão fixo no mobile
+    g('uploadBtns').style.display='none';
+    const fixed=g('previewActionsFixed');
+    if(fixed) fixed.style.display='flex';
+    // Scroll para a preview no mobile
+    setTimeout(()=>g('previewBox').scrollIntoView({behavior:'smooth',block:'start'}),100);
+  };
+  r.readAsDataURL(file);
+}
+function resetUpload(){
+  imgB64=null;
+  g('previewBox').classList.remove('show');
+  g('uploadBtns').style.display='';
+  const fixed=g('previewActionsFixed');
+  if(fixed) fixed.style.display='none';
+  // Reset spinners
+  const sp2=g('spinner2'); if(sp2) sp2.style.display='none';
+  const tx2=g('analyzeTxt2'); if(tx2) tx2.textContent='📊 Analisar com IA';
+}
 
 // ── MODO REGISTRO ─────────────────────────────────────────
 function setMode(mode){
@@ -1977,7 +2044,10 @@ async function analyzeImage(){
   if(!imgB64) return;
   const key=getApiKey(); if(!key){ showPage('config'); toast('Configure a API Key primeiro'); return; }
   const btn=g('analyzeBtn'); const sp=g('spinner'); const txt=g('analyzeTxt');
+  const sp2=g('spinner2'); const txt2=g('analyzeTxt2');
   btn.disabled=true; sp.style.display='block'; txt.textContent='Analisando...';
+  if(sp2) sp2.style.display='block';
+  if(txt2) txt2.textContent='Analisando...';
 
   const prompt=`Você está analisando uma imagem enviada por uma funcionária de confecção.
 
