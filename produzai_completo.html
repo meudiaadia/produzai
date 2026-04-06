@@ -1282,6 +1282,7 @@ function initSupabase(){
   // Validar formato básico antes de tentar conectar
   if(!SUPA_URL.includes('supabase.co') && !SUPA_URL.includes('supabase.io')) return false;
   if(SUPA_KEY.length < 20) return false;
+  // Aceita tanto formato anon/eyJ quanto sb_publishable_
   try{ _sb=window.supabase.createClient(SUPA_URL,SUPA_KEY); return true; }
   catch(e){ _sb=null; return false; }
 }
@@ -1744,8 +1745,14 @@ function verificarTrialExpirando(){
 
 // ── LOGIN GOOGLE ──────────────────────────────────────────
 async function loginGoogle(){
+  // Tenta inicializar Supabase se ainda não estiver conectado
   if(!usandoSupabase()){
-    toast('Configure o Supabase para usar o login com Google');
+    SUPA_URL = localStorage.getItem('supa_url')||'';
+    SUPA_KEY = localStorage.getItem('supa_key')||'';
+    initSupabase();
+  }
+  if(!usandoSupabase()){
+    toast('Configure o Supabase em ⚙ Config para usar o login com Google');
     return;
   }
   try{
