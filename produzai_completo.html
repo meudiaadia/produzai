@@ -1274,8 +1274,12 @@ tr:hover td{background:var(--surf2)}
 
 <script>
 // ── SUPABASE ──────────────────────────────────────────────
-let SUPA_URL = localStorage.getItem('supa_url')||'';
-let SUPA_KEY = localStorage.getItem('supa_key')||'';
+// Credenciais centralizadas (fallback se não configurado pelo usuário)
+const SUPA_URL_DEFAULT = 'https://ybzqrkbopowlhjnwjuka.supabase.co';
+const SUPA_KEY_DEFAULT = 'sb_publishable_VUhdj9HMV1L4u4wbTXA6Fw_dTku0_Rb';
+
+let SUPA_URL = localStorage.getItem('supa_url') || SUPA_URL_DEFAULT;
+let SUPA_KEY = localStorage.getItem('supa_key') || SUPA_KEY_DEFAULT;
 let _sb = null;
 function initSupabase(){
   if(!SUPA_URL||!SUPA_KEY) return false;
