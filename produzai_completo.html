@@ -86,7 +86,7 @@ body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--t);min-he
 
 /* LAYOUT */
 .main{max-width:960px;margin:0 auto;padding:24px 16px}
-.page{display:none}.page.active{display:block}
+.page{display:none}.page.active{display:block;min-height:calc(100vh - 56px);overflow-y:auto}
 
 /* CARDS */
 .card{background:var(--surf);border:1px solid var(--b);border-radius:var(--rl);padding:20px;margin-bottom:14px}
@@ -179,7 +179,9 @@ body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--t);min-he
   .co-name-text{display:none}
   
   /* Ajustar padding das páginas para não cobrir nav inferior */
-  .page.active .main{padding-bottom:80px}
+  .page.active .main{padding-bottom:90px}
+  /* Garantir scroll em todas as páginas no mobile */
+  .page.active{overflow-y:auto;-webkit-overflow-scrolling:touch;height:calc(100vh - 50px)}
   
   /* Topbar mais compacta */
   .topbar{padding:0 14px;height:50px}
