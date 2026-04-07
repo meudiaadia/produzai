@@ -3211,3 +3211,10 @@ function seedDemo(){
       const def=Math.floor(Math.random()*4);
       linhas.push({produto:prods[Math.floor(Math.random()*prods.length)],cor:cores[Math.floor(Math.random()*cores.length)],tamanho:tams[Math.floor(Math.random()*tams.length)],op:'OP'+String(1000+Math.floor(Math.random()*999)),qtd_conferida:qtd,qtd_defeitos:def,num_costureira:String(i)});
     }
+     records.push({id:Date.now()+d*10+i,nome:'Demo',conferente:'Demo',data:dateStr,linhas,savedAt:new Date().toISOString()});
+  }
+  saveRecs();
+}
+</script>
+</body>
+</html>
