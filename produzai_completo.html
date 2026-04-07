@@ -532,6 +532,7 @@ tr:hover td{background:var(--surf2)}
     <button class="nav-pill" onclick="showPage('historico')">🗂 Histórico</button>
     <button class="nav-pill" onclick="showPage('config')">⚙ Config</button>
     <button class="nav-pill" onclick="showPage('ajuda')">❓ Ajuda</button>
+    <button class="nav-pill" id="navAdmin" style="display:none" onclick="showPage('admin')">🔑 Admin</button>
   </div>
   <div class="topbar-right">
     <div class="theme-toggle" onclick="toggleTheme()" title="Alternar tema" id="themeToggle"></div>
@@ -582,6 +583,9 @@ tr:hover td{background:var(--surf2)}
   </button>
   <button class="mobile-menu-item" onclick="showPage('ajuda');fecharMobileMenu()">
     <span>❓</span> Ajuda
+  </button>
+  <button class="mobile-menu-item" id="navAdminMob" style="display:none" onclick="showPage('admin');fecharMobileMenu()">
+    <span>🔑</span> Admin
   </button>
   <div style="border-top:1px solid var(--b);margin:8px 0"></div>
   <button class="mobile-menu-item" onclick="doLogout()" style="color:var(--red)">
@@ -1235,6 +1239,48 @@ tr:hover td{background:var(--surf2)}
   </div>
 </div>
 
+<!-- ADMIN -->
+<div class="page" id="page-admin">
+  <div class="main" style="max-width:700px">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:24px;flex-wrap:wrap;gap:10px">
+      <div>
+        <div style="font-size:17px;font-weight:600">🔑 Painel Admin</div>
+        <div style="font-size:12px;color:var(--t3);margin-top:2px">Gerencie convites para clientes</div>
+      </div>
+      <button class="btn btn-primary btn-sm" onclick="gerarConvite()">+ Gerar convite</button>
+    </div>
+
+    <!-- Formulário novo convite -->
+    <div id="adminNovoConvite" style="display:none;background:var(--surf);border:1px solid var(--b);border-radius:var(--rl);padding:20px;margin-bottom:20px">
+      <div style="font-size:14px;font-weight:600;margin-bottom:14px">Novo convite</div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:12px">
+        <div class="fg"><label>Nome do cliente</label><input id="adminNome" type="text" placeholder="Ex: Confecções Silva"></div>
+        <div class="fg"><label>Email (opcional)</label><input id="adminEmail" type="email" placeholder="cliente@email.com"></div>
+      </div>
+      <div style="display:flex;gap:8px">
+        <button class="btn btn-primary" onclick="criarConvite()">Gerar link</button>
+        <button class="btn btn-ghost" onclick="g('adminNovoConvite').style.display='none'">Cancelar</button>
+      </div>
+    </div>
+
+    <!-- Link gerado -->
+    <div id="adminLinkGerado" style="display:none;background:var(--green-bg);border:1px solid var(--green);border-radius:var(--r);padding:16px;margin-bottom:20px">
+      <div style="font-size:12px;font-weight:600;color:var(--green);margin-bottom:8px">✓ Link gerado com sucesso!</div>
+      <div style="display:flex;gap:8px;align-items:center">
+        <input id="adminLinkUrl" type="text" readonly style="flex:1;padding:8px 10px;background:var(--surf);border:1px solid var(--b);border-radius:var(--r);font-size:12px;color:var(--t);font-family:monospace">
+        <button class="btn btn-primary btn-sm" onclick="copiarLink()">Copiar</button>
+      </div>
+      <div style="font-size:11px;color:var(--t3);margin-top:8px">Validade: 6 meses · Plano: Profissional · Link de uso único</div>
+    </div>
+
+    <!-- Lista de convites -->
+    <div style="font-size:13px;font-weight:600;margin-bottom:10px;color:var(--t2)">Convites gerados</div>
+    <div id="adminListaConvites">
+      <div style="text-align:center;padding:30px;color:var(--t3);font-size:13px">Nenhum convite gerado ainda</div>
+    </div>
+  </div>
+</div>
+
 </div><!-- /appShell -->
 
 <!-- MODAL CADASTRO PESSOA -->
@@ -1362,19 +1408,24 @@ if(usandoSupabase()){
 
 // Restaura sessão ao carregar a página
 window.addEventListener('load', async ()=>{
+  // Verificar se há convite na URL
+  const params = new URLSearchParams(window.location.search);
+  const temConvite = params.get('convite');
+
   if(!usandoSupabase()){
-    // Sem Supabase — mostra login direto
     g('loginPage').style.display='flex';
+    if(temConvite) setTimeout(()=>verificarConviteUrl(), 500);
     return;
   }
   try{
     const {data:{session}}=await _sb.auth.getSession();
-    if(session){
+    if(session && !temConvite){
       currentUser=session.user;
       await carregarDadosEmpresa();
       verificarTrialEPlano();
     } else {
       g('loginPage').style.display='flex';
+      if(temConvite) setTimeout(()=>verificarConviteUrl(), 300);
     }
   }catch(e){
     g('loginPage').style.display='flex';
@@ -1546,8 +1597,24 @@ async function doCadastro(){
     if(rpcErr) throw rpcErr;
 
     await carregarDadosEmpresa();
+
+    // Verificar se veio de convite — dar plano Profissional por 6 meses
+    const codigoConvite = sessionStorage.getItem('convite_codigo');
+    const expiraConvite = sessionStorage.getItem('convite_expira');
+    if(codigoConvite && expiraConvite && usandoSupabase()){
+      await _sb.from('empresas').update({
+        plano: 'profissional',
+        assinatura_ativa: true,
+        trial_expira: expiraConvite
+      }).eq('id', currentUser.id).catch(()=>{});
+      await marcarConviteUsado(codigoConvite);
+      sessionStorage.removeItem('convite_codigo');
+      sessionStorage.removeItem('convite_expira');
+      toast('Bem-vindo! Acesso Profissional por 6 meses ativado! 🎉');
+    } else {
+      toast('Bem-vindo! Seu trial de 14 dias começou.');
+    }
     entrarNoApp();
-    toast('Bem-vindo! Seu trial de 14 dias começou.');
   }catch(e){
     err.textContent=traduzirErroAuth(e.message);
     err.style.display='block';
@@ -1612,6 +1679,7 @@ function entrarNoApp(){
   renderAll();
   renderTrialBanner();
   verificarTrialExpirando();
+  mostrarAdmin();
 }
 
 function renderTrialBanner(){
@@ -1864,7 +1932,7 @@ function showPage(name){
   g('page-'+name).classList.add('active');
 
   // Sincroniza nav desktop
-  const pages=['upload','dashboard','metas','relatorios','historico','config','ajuda'];
+  const pages=['upload','dashboard','metas','relatorios','historico','config','ajuda','admin'];
   document.querySelectorAll('.nav-desktop .nav-pill').forEach((b,i)=>{
     b.classList.toggle('active', pages[i]===name);
   });
@@ -1880,6 +1948,7 @@ function showPage(name){
   if(name==='config') renderConfig();
   if(name==='relatorios') renderRelFiltros();
   if(name==='ajuda') initAjuda();
+  if(name==='admin'){ renderListaConvites(); }
 }
 
 function toggleMobileMenu(){
@@ -2049,20 +2118,24 @@ async function analyzeImage(){
   if(sp2) sp2.style.display='block';
   if(txt2) txt2.textContent='Analisando...';
 
-  const prompt=`Você está analisando uma imagem enviada por uma funcionária de confecção.
+  // Monta lista de produtos cadastrados para ajudar a IA
+  const produtosCadastrados = JSON.parse(localStorage.getItem('produzai_prods')||'[]');
+  const listaProdutos = produtosCadastrados.length > 0
+    ? 'PRODUTOS CADASTRADOS NESTA EMPRESA (use estes nomes exatos quando possível): ' + produtosCadastrados.join(', ')
+    : 'Nenhum produto cadastrado — extraia o nome exatamente como está escrito.';
 
-TAREFA: Verificar se a imagem é um formulário de controle de produção legível e extrair os dados.
-
-REGRAS:
-1. Se a imagem NÃO for um formulário (foto de pessoa, objeto, tela, etc): retorne {"erro":"nao_e_formulario"}
-2. Se for formulário mas estiver ilegível (desfocado, escuro, cortado, virado): retorne {"erro":"ilegivel","motivo":"descrição breve do problema"}
-3. Se for formulário legível mas com poucos dados preenchidos (menos de 1 linha): retorne {"erro":"vazio","motivo":"formulário sem dados preenchidos"}
-4. Se conseguir ler: retorne o JSON completo abaixo com os dados extraídos.
-
-JSON de sucesso (retorne APENAS este JSON, sem texto extra):
-{"nome":"nome da conferente","data":"YYYY-MM-DD","linhas":[{"produto":"","cor":"","tamanho":"","op":"","qtd_conferida":0,"qtd_defeitos":0,"num_costureira":""}]}
-
-Se algum campo estiver em branco no formulário, use "" ou 0. Extraia TODAS as linhas preenchidas.`;
+  const prompt = 'Você está analisando uma imagem de um formulário de controle de produção de confecção.' +
+    ' ' + listaProdutos +
+    ' TAREFA: Verificar se a imagem é um formulário legível e extrair os dados.' +
+    ' REGRAS: 1. Se NÃO for formulário: retorne {"erro":"nao_e_formulario"}' +
+    ' 2. Se ilegível: retorne {"erro":"ilegivel","motivo":"descrição"}' +
+    ' 3. Se vazio/sem dados: retorne {"erro":"vazio","motivo":"sem dados"}' +
+    ' 4. Se legível: extraia todos os dados.' +
+    ' NORMALIZAÇÃO DE PRODUTOS: Se houver produtos cadastrados, tente casar o que está escrito com o produto cadastrado mais próximo (ignore maiúsculas, abreviações e erros de grafia). Se não houver produtos cadastrados, use o nome exatamente como está escrito.' +
+    ' Retorne APENAS este JSON sem texto extra:' +
+    ' {"nome":"conferente","data":"YYYY-MM-DD","linhas":[{"produto":"","cor":"","tamanho":"","op":"","qtd_conferida":0,"qtd_defeitos":0,"num_costureira":"","produto_normalizado":true}]}' +
+    ' Onde produto_normalizado=true se casou com produto cadastrado, false se não casou.' +
+    ' Se campo em branco use "" ou 0. Extraia TODAS as linhas preenchidas.';
 
   try{
     const res=await fetch('/api/analisar',{
@@ -2154,13 +2227,66 @@ function loadReview(data){
   g('reviewTitle').textContent='Revisar dados extraídos';
   g('reviewBadge').textContent='Pronto para salvar';
   g('reviewBadge').className='tag tag-green';
+  _produtosParaAdicionar = new Set();
+  const banner = g('bannerNovoProduto'); if(banner) banner.remove();
   (data.linhas||[]).forEach(r=>addRow(r)); updateRowCount();
 }
 const esc = s => String(s||'').replace(/"/g,'&quot;');
 function addRow(d){
-  d=d||{}; const tr=document.createElement('tr');
-  tr.innerHTML=`<td><input class="tbl-input" value="${esc(d.produto)}" placeholder="Produto"></td><td><input class="tbl-input" value="${esc(d.cor)}" placeholder="Cor"></td><td><input class="tbl-input" value="${esc(d.tamanho)}" placeholder="P/M/G" style="width:55px"></td><td><input class="tbl-input" value="${esc(d.op)}" placeholder="OP" style="width:65px"></td><td><input class="tbl-input" type="number" value="${d.qtd_conferida||0}" min="0" style="width:65px"></td><td><input class="tbl-input" type="number" value="${d.qtd_defeitos||0}" min="0" style="width:65px"></td><td><input class="tbl-input" value="${esc(d.num_costureira)}" placeholder="Nº" style="width:55px"></td><td class="rm-btn" onclick="this.closest('tr').remove();updateRowCount()">×</td>`;
-  g('reviewBody').appendChild(tr); updateRowCount();
+  d=d||{};
+  const prods = JSON.parse(localStorage.getItem('produzai_prods')||'[]');
+  const temCadastro = prods.length > 0;
+  const prodNormalizado = d.produto_normalizado !== false; // true por padrão
+  const prodEmCadastro = !temCadastro || prods.some(p=>p.toLowerCase()===String(d.produto||'').toLowerCase());
+  const destacar = temCadastro && !prodEmCadastro;
+
+  const tr=document.createElement('tr');
+  tr.innerHTML='<td style="position:relative">' +
+    '<input class="tbl-input" value="'+esc(d.produto)+'" placeholder="Produto"' +
+    (destacar?' style="border-color:var(--amber);background:var(--amber-bg)"':'') + '>' +
+    (destacar?'<div style="font-size:9px;color:var(--amber);margin-top:2px;padding-left:2px">⚠ Não cadastrado</div>':'') +
+    '</td>' +
+    '<td><input class="tbl-input" value="'+esc(d.cor)+'" placeholder="Cor"></td>' +
+    '<td><input class="tbl-input" value="'+esc(d.tamanho)+'" placeholder="P/M/G" style="width:55px"></td>' +
+    '<td><input class="tbl-input" value="'+esc(d.op)+'" placeholder="OP" style="width:65px"></td>' +
+    '<td><input class="tbl-input" type="number" value="'+(d.qtd_conferida||0)+'" min="0" style="width:65px"></td>' +
+    '<td><input class="tbl-input" type="number" value="'+(d.qtd_defeitos||0)+'" min="0" style="width:65px"></td>' +
+    '<td><input class="tbl-input" value="'+esc(d.num_costureira)+'" placeholder="Nº" style="width:55px"></td>' +
+    '<td class="rm-btn" onclick="this.closest(&quot;tr&quot;).remove();updateRowCount()">×</td>';
+  g('reviewBody').appendChild(tr);
+  updateRowCount();
+  // Se tem produto não cadastrado, mostra botão para adicionar
+  if(destacar) mostrarBotaoAdicionarProduto(d.produto);
+}
+
+let _produtosParaAdicionar = new Set();
+function mostrarBotaoAdicionarProduto(nomeProd){
+  if(!nomeProd || _produtosParaAdicionar.has(nomeProd)) return;
+  _produtosParaAdicionar.add(nomeProd);
+  let banner = g('bannerNovoProduto');
+  if(!banner){
+    banner = document.createElement('div');
+    banner.id = 'bannerNovoProduto';
+    banner.style.cssText = 'background:var(--amber-bg);border:1px solid var(--amber);border-radius:var(--r);padding:10px 14px;margin-bottom:12px;font-size:12px;display:flex;align-items:center;gap:10px;flex-wrap:wrap';
+    g('reviewBody').closest('table').before(banner);
+  }
+  const produtos = Array.from(_produtosParaAdicionar);
+  banner.innerHTML = '<span style="color:var(--amber)">⚠</span>' +
+    '<span style="flex:1">Produtos não encontrados no cadastro: <strong>' + produtos.join(', ') + '</strong></span>' +
+    '<button class="btn btn-ghost btn-sm" onclick="adicionarProdutosNovos()" style="font-size:11px;border-color:var(--amber);color:var(--amber)">+ Adicionar ao cadastro</button>';
+}
+
+function adicionarProdutosNovos(){
+  const prods = JSON.parse(localStorage.getItem('produzai_prods')||'[]');
+  let adicionados = 0;
+  _produtosParaAdicionar.forEach(p=>{
+    if(!prods.includes(p)){ prods.push(p); adicionados++; }
+  });
+  localStorage.setItem('produzai_prods', JSON.stringify(prods));
+  _produtosParaAdicionar.clear();
+  const banner = g('bannerNovoProduto');
+  if(banner){ banner.innerHTML = '<span style="color:var(--green)">✓</span> <span>'+adicionados+' produto(s) adicionado(s) ao cadastro!</span>'; setTimeout(()=>banner.remove(), 3000); }
+  toast(adicionados + ' produto(s) adicionado(s) ao cadastro!');
 }
 function updateRowCount(){ const n=g('reviewBody').querySelectorAll('tr').length; g('rowCount').textContent=n+' linha'+(n!==1?'s':''); }
 function saveRecord(){
@@ -2850,6 +2976,174 @@ function filtrarAjuda(q){
       }
     }
   });
+}
+
+
+// ── ADMIN ─────────────────────────────────────────────────
+const ADMIN_EMAIL = 'cordeiroribeirolivia@gmail.com'; // seu email
+
+function verificarAdmin(){
+  if(!currentUser) return false;
+  return currentUser.email === ADMIN_EMAIL;
+}
+
+function mostrarAdmin(){
+  if(verificarAdmin()){
+    const nav = document.getElementById('navAdmin');
+    const navMob = document.getElementById('navAdminMob');
+    if(nav) nav.style.display='';
+    if(navMob) navMob.style.display='';
+  }
+}
+
+function gerarConvite(){
+  g('adminNovoConvite').style.display='block';
+  g('adminLinkGerado').style.display='none';
+  g('adminNome').focus();
+}
+
+function gerarCodigo(){
+  const chars = 'ABCDEFGHJKMNPQRSTUVWXYZabcdefghjkmnpqrstuvwxyz23456789';
+  let code = '';
+  for(let i=0;i<10;i++) code += chars[Math.floor(Math.random()*chars.length)];
+  return code;
+}
+
+async function criarConvite(){
+  const nome = g('adminNome').value.trim();
+  if(!nome){ toast('Informe o nome do cliente'); return; }
+  const email = g('adminEmail').value.trim();
+  const codigo = gerarCodigo();
+  const expira = new Date();
+  expira.setMonth(expira.getMonth() + 6);
+
+  // Salva no localStorage como fallback
+  const convites = JSON.parse(localStorage.getItem('produzai_convites')||'[]');
+  convites.push({
+    id: Date.now(),
+    codigo,
+    nome_cliente: nome,
+    email_cliente: email,
+    criado_em: new Date().toISOString(),
+    expira_em: expira.toISOString(),
+    usado: false
+  });
+  localStorage.setItem('produzai_convites', JSON.stringify(convites));
+
+  // Salva no Supabase se disponível
+  if(usandoSupabase()){
+    await _sb.from('convites').insert({
+      codigo, nome_cliente: nome, email_cliente: email||null,
+      expira_em: expira.toISOString(), usado: false
+    }).catch(()=>{});
+  }
+
+  const link = window.location.origin + '/app?convite=' + codigo;
+  g('adminLinkUrl').value = link;
+  g('adminLinkGerado').style.display='block';
+  g('adminNovoConvite').style.display='none';
+  g('adminNome').value='';
+  g('adminEmail').value='';
+  renderListaConvites();
+  toast('Convite criado!');
+}
+
+function copiarLink(){
+  const url = g('adminLinkUrl').value;
+  navigator.clipboard.writeText(url).then(()=>toast('Link copiado!')).catch(()=>{
+    g('adminLinkUrl').select();
+    document.execCommand('copy');
+    toast('Link copiado!');
+  });
+}
+
+function renderListaConvites(){
+  const cont = g('adminListaConvites'); if(!cont) return;
+  const convites = JSON.parse(localStorage.getItem('produzai_convites')||'[]');
+  if(!convites.length){
+    cont.innerHTML='<div style="text-align:center;padding:30px;color:var(--t3);font-size:13px">Nenhum convite gerado ainda</div>';
+    return;
+  }
+  cont.innerHTML='';
+  convites.slice().reverse().forEach(function(c){
+    const exp = new Date(c.expira_em);
+    const expirou = exp < new Date();
+    const status = c.usado ? '✓ Usado' : expirou ? '✕ Expirado' : '● Ativo';
+    const cor = c.usado ? 'var(--t3)' : expirou ? 'var(--red)' : 'var(--green)';
+    const link = window.location.origin + '/app?convite=' + c.codigo;
+    const div = document.createElement('div');
+    div.style.cssText = 'background:var(--surf);border:1px solid var(--b);border-radius:var(--r);padding:14px;margin-bottom:8px';
+    const inpId = 'conv_inp_' + c.id;
+    const btnId = 'conv_btn_' + c.id;
+    div.innerHTML =
+      '<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:6px">' +
+        '<div style="font-size:13px;font-weight:600">' + (c.nome_cliente||'') + '</div>' +
+        '<div style="font-size:11px;font-weight:600;color:' + cor + '">' + status + '</div>' +
+      '</div>' +
+      '<div style="font-size:11px;color:var(--t3);margin-bottom:8px">' +
+        (c.email_cliente ? c.email_cliente + ' · ' : '') +
+        'Expira: ' + exp.toLocaleDateString('pt-BR') +
+      '</div>' +
+      '<div style="display:flex;gap:6px;align-items:center">' +
+        '<input id="' + inpId + '" type="text" readonly style="flex:1;padding:6px 8px;background:var(--surf2);border:1px solid var(--b);border-radius:6px;font-size:11px;color:var(--t2);font-family:monospace">' +
+        '<button id="' + btnId + '" class="btn btn-ghost btn-sm">Copiar</button>' +
+      '</div>';
+    cont.appendChild(div);
+    document.getElementById(inpId).value = link;
+    document.getElementById(btnId).addEventListener('click', function(){
+      navigator.clipboard.writeText(link).then(function(){ toast('Copiado!'); });
+    });
+  });
+}
+
+// ── PÁGINA DE CONVITE ──────────────────────────────────────
+async function verificarConviteUrl(){
+  const params = new URLSearchParams(window.location.search);
+  const codigo = params.get('convite');
+  if(!codigo) return;
+
+  // Verifica se o convite é válido
+  let convite = null;
+
+  // Busca no Supabase
+  if(usandoSupabase()){
+    const {data} = await _sb.from('convites').select('*').eq('codigo', codigo).single().catch(()=>({data:null}));
+    convite = data;
+  }
+
+  // Fallback: busca no localStorage
+  if(!convite){
+    const convites = JSON.parse(localStorage.getItem('produzai_convites')||'[]');
+    convite = convites.find(c=>c.codigo===codigo);
+  }
+
+  if(!convite){ toast('Link de convite inválido'); return; }
+  if(convite.usado){ toast('Este convite já foi utilizado'); return; }
+  if(new Date(convite.expira_em) < new Date()){ toast('Este convite expirou'); return; }
+
+  // Mostra tela de cadastro com dados pré-preenchidos e flag de convite
+  showAuth('cadastro');
+  if(convite.nome_cliente) g('cadEmpresa').value = convite.nome_cliente;
+  if(convite.email_cliente) g('cadEmail').value = convite.email_cliente;
+
+  // Guarda o código para usar no cadastro
+  sessionStorage.setItem('convite_codigo', codigo);
+  sessionStorage.setItem('convite_expira', convite.expira_em);
+
+  toast('Convite válido! Complete seu cadastro.');
+}
+
+async function marcarConviteUsado(codigo){
+  // Marca no localStorage
+  const convites = JSON.parse(localStorage.getItem('produzai_convites')||'[]');
+  const idx = convites.findIndex(c=>c.codigo===codigo);
+  if(idx>=0){ convites[idx].usado=true; convites[idx].usado_em=new Date().toISOString(); }
+  localStorage.setItem('produzai_convites', JSON.stringify(convites));
+
+  // Marca no Supabase
+  if(usandoSupabase()){
+    await _sb.from('convites').update({usado:true,usado_em:new Date().toISOString()}).eq('codigo',codigo).catch(()=>{});
+  }
 }
 
 function seedDemo(){
