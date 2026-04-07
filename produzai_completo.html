@@ -427,7 +427,7 @@ tr:hover td{background:var(--surf2)}
 <!-- ══ AUTH PAGES ════════════════════════════════════════ -->
 
 <!-- LOGIN -->
-<div class="login-wrap" id="loginPage" style="display:none">
+<div class="login-wrap" id="loginPage" style="display:flex">
   <div class="login-box">
     <div class="login-brand">
       <div class="name">Produz<span>AI</span></div>
@@ -1430,7 +1430,7 @@ window.addEventListener('load', async ()=>{
     if(g('loginPage').style.display==='none' || g('loginPage').style.display===''){
       g('loginPage').style.display='flex';
     }
-  }, 3000);
+  }, 1000);
 
   if(!usandoSupabase()){
     clearTimeout(fallback);
