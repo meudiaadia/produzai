@@ -656,7 +656,7 @@ footer{
     <a href="#precos">Preços</a>
   </div>
   <div style="display:flex;gap:8px;align-items:center">
-    <a href="produzai_completo.html" style="font-size:14px;font-weight:500;color:var(--muted2);text-decoration:none;padding:8px 16px;border:1px solid var(--line2);border-radius:8px;transition:all .2s" onmouseover="this.style.borderColor='#8892A4';this.style.color='#F8FAFC'" onmouseout="this.style.borderColor='var(--line2)';this.style.color='var(--muted2)'">Entrar</a>
+    <a href="/app" style="font-size:14px;font-weight:500;color:var(--muted2);text-decoration:none;padding:8px 16px;border:1px solid var(--line2);border-radius:8px;transition:all .2s" onmouseover="this.style.borderColor='#8892A4';this.style.color='#F8FAFC'" onmouseout="this.style.borderColor='var(--line2)';this.style.color='var(--muted2)'">Entrar</a>
     <a href="#trial" class="nav-cta">Começar grátis →</a>
   </div>
 </nav>
@@ -682,11 +682,11 @@ footer{
       Testar 14 dias grátis
       <span>→</span>
     </a>
-    <a href="produzai_completo.html" class="btn-hero btn-hero-ghost">
+    <a href="/app" class="btn-hero btn-hero-ghost">
       👀 Ver demonstração
     </a>
   </div>
-  <p class="hero-note">14 dias grátis · Planos a partir de R$59,90/mês · Cancele quando quiser &nbsp;·&nbsp; <a href="produzai_completo.html" style="color:var(--accent2);text-decoration:none">Já tem conta? Entrar →</a></p>
+  <p class="hero-note">14 dias grátis · Planos a partir de R$59,90/mês · Cancele quando quiser &nbsp;·&nbsp; <a href="/app" style="color:var(--accent2);text-decoration:none">Já tem conta? Entrar →</a></p>
 
   <!-- APP MOCKUP -->
   <div class="mockup-wrap">
@@ -1082,11 +1082,11 @@ footer{
       <a href="#como-funciona">Como funciona</a>
       <a href="#beneficios">Benefícios</a>
       <a href="#precos">Preços</a>
-      <a href="produzai_completo.html">Acessar o app</a>
+      <a href="/app">Acessar o app</a>
     </div>
     <div class="footer-links-col">
       <h4>Recursos</h4>
-      <a href="produzai_completo.html">Acessar o app</a>
+      <a href="/app">Acessar o app</a>
       <a href="#como-funciona">Como funciona</a>
       <a href="#precos">Planos e preços</a>
       <a href="#trial">Começar grátis</a>
@@ -1163,7 +1163,7 @@ function iniciarTrial(){
   const email=document.getElementById('trialEmail').value.trim();
   if(!email||!email.includes('@')){ alert('Informe um email válido'); return; }
   // Redireciona para o app com email pré-preenchido
-  window.location.href=`produzai_completo.html?email=${encodeURIComponent(email)}`;
+  window.location.href=`/app?email=${encodeURIComponent(email)}`;
 }
 
 // Navbar scroll effect
