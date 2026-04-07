@@ -2,7 +2,10 @@
   "rewrites": [
     { "source": "/", "destination": "/landing.html" },
     { "source": "/app", "destination": "/produzai_completo.html" },
+    { "source": "/entrar", "destination": "/produzai_completo.html" },
     { "source": "/docs", "destination": "/docs.html" },
-    { "source": "/formulario", "destination": "/formulario_impressao.html" }
+    { "source": "/formulario", "destination": "/formulario_impressao.html" },
+    { "source": "/politica", "destination": "/politica.html" },
+    { "source": "/termos", "destination": "/termos.html" }
   ]
 }
