@@ -976,8 +976,8 @@ tr:hover td{background:var(--surf2)}
         <div class="fg"><label>Meta padrão de formulários/dia (auxiliar)</label><input id="cfgMetaForms" type="number" value="2"></div>
       </div>
     </div>
-    <div class="card">
-      <div class="card-title">Supabase — banco na nuvem</div>
+    <div class="card" id="cardSupabase" style="display:none">
+      <div class="card-title">🔧 Supabase — banco na nuvem</div>
       <div style="font-size:12px;color:var(--t2);margin-bottom:12px">Configure para salvar dados na nuvem, multi-dispositivo e multi-empresa. Obtenha em <strong>supabase.com → Settings → API</strong>.</div>
       <div class="fields-2" style="margin-bottom:10px">
         <div class="fg"><label>Project URL</label><input id="cfgSupaUrl" placeholder="https://xxx.supabase.co" type="url"></div>
@@ -988,8 +988,8 @@ tr:hover td{background:var(--surf2)}
         <span id="supaStatus" style="font-size:12px;color:var(--t3)"></span>
       </div>
     </div>
-    <div class="card">
-      <div class="card-title">API Key Anthropic</div>
+    <div class="card" id="cardApiKey" style="display:none">
+      <div class="card-title">🔧 API Key Anthropic</div>
       <div style="font-size:12px;color:var(--t2);margin-bottom:10px">Necessária para leitura das fotos via IA.</div>
       <div class="fg" style="margin-bottom:10px;display:none"><label>API Key</label><input id="cfgApiKey" type="password" placeholder="sk-ant-..."></div>
       <button class="btn btn-primary btn-sm" onclick="saveApiKey()">Salvar chave</button>
@@ -2993,6 +2993,11 @@ function mostrarAdmin(){
     const navMob = document.getElementById('navAdminMob');
     if(nav) nav.style.display='';
     if(navMob) navMob.style.display='';
+    // Mostrar cards técnicos na Config só para admin
+    const cardSupa = document.getElementById('cardSupabase');
+    const cardApi = document.getElementById('cardApiKey');
+    if(cardSupa) cardSupa.style.display='';
+    if(cardApi) cardApi.style.display='';
   }
 }
 
