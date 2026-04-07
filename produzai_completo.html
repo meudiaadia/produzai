@@ -1425,13 +1425,22 @@ window.addEventListener('load', async ()=>{
   const params = new URLSearchParams(window.location.search);
   const temConvite = params.get('convite');
 
+  // Fallback: se em 3 segundos nada acontecer, mostra o login
+  const fallback = setTimeout(()=>{
+    if(g('loginPage').style.display==='none' || g('loginPage').style.display===''){
+      g('loginPage').style.display='flex';
+    }
+  }, 3000);
+
   if(!usandoSupabase()){
+    clearTimeout(fallback);
     g('loginPage').style.display='flex';
     if(temConvite) setTimeout(()=>verificarConviteUrl(), 500);
     return;
   }
   try{
     const {data:{session}}=await _sb.auth.getSession();
+    clearTimeout(fallback);
     if(session && !temConvite){
       currentUser=session.user;
       await carregarDadosEmpresa();
@@ -1441,6 +1450,7 @@ window.addEventListener('load', async ()=>{
       if(temConvite) setTimeout(()=>verificarConviteUrl(), 300);
     }
   }catch(e){
+    clearTimeout(fallback);
     g('loginPage').style.display='flex';
   }
 });
