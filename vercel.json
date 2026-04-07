@@ -1,6 +1,13 @@
 {
-  "rewrites": [
-    { "source": "/", "destination": "/landing.html" },
-    { "source": "/app", "destination": "/produzai_completo.html" }
+  "version": 2,
+  "builds": [
+    { "src": "api/*.js", "use": "@vercel/node" },
+    { "src": "*.html", "use": "@vercel/static" }
+  ],
+  "routes": [
+    { "src": "/api/(.*)", "dest": "/api/$1" },
+    { "src": "/app", "dest": "/produzai_completo.html" },
+    { "src": "/", "dest": "/landing.html" },
+    { "src": "/(.*\\.html)", "dest": "/$1" }
   ]
 }
