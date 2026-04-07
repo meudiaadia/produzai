@@ -1233,8 +1233,19 @@ tr:hover td{background:var(--surf2)}
         <div style="font-size:20px;margin-bottom:8px">🙋</div>
         <div style="font-size:14px;font-weight:600;margin-bottom:4px">Não encontrou o que precisava?</div>
         <div style="font-size:12px;color:var(--t3);margin-bottom:14px">Nossa equipe de suporte está disponível para ajudar.</div>
-        <a href="#" onclick="navigator.clipboard.writeText('suporte@produzai.com.br').then(()=>toast('Email copiado!')); return false;" style="display:inline-block;padding:9px 20px;background:var(--accent);color:#fff;border-radius:var(--r);text-decoration:none;font-size:13px;font-weight:600">📧 Copiar email de suporte</a>
-        <div style="font-size:11px;color:var(--t3);margin-top:8px">suporte <!-- @ --> produzai.com.br</div>
+        <button onclick="navigator.clipboard.writeText('suporte@produzai.com.br').then(()=>toast('Email copiado!'))" style="display:inline-block;padding:9px 20px;background:var(--accent);color:#fff;border-radius:var(--r);border:none;font-family:'DM Sans',sans-serif;font-size:13px;font-weight:600;cursor:pointer">📧 Copiar email de suporte</button>
+        <div style="font-size:11px;color:var(--t3);margin-top:8px"><a href="/cdn-cgi/l/email-protection" class="__cf_email__" data-cfemail="fd8e888d928f8998bd8d8f929988879c94d39e9290d39f8f">[email&#160;protected]</a></div>
+      </div>
+
+      <!-- LINKS LEGAIS -->
+      <div style="margin-top:12px;display:flex;gap:12px;justify-content:center;flex-wrap:wrap;padding:16px 0;border-top:1px solid var(--b)">
+        <a href="politica.html" target="_blank" style="font-size:12px;color:var(--t3);text-decoration:none;display:flex;align-items:center;gap:4px" onmouseover="this.style.color='var(--t2)'" onmouseout="this.style.color='var(--t3)'">🔒 Política de Privacidade</a>
+        <span style="color:var(--b2)">·</span>
+        <a href="termos.html" target="_blank" style="font-size:12px;color:var(--t3);text-decoration:none;display:flex;align-items:center;gap:4px" onmouseover="this.style.color='var(--t2)'" onmouseout="this.style.color='var(--t3)'">📋 Termos de Uso</a>
+        <span style="color:var(--b2)">·</span>
+        <a href="docs.html" target="_blank" style="font-size:12px;color:var(--t3);text-decoration:none;display:flex;align-items:center;gap:4px" onmouseover="this.style.color='var(--t2)'" onmouseout="this.style.color='var(--t3)'">📖 Documentação técnica</a>
+        <span style="color:var(--b2)">·</span>
+        <a href="landing.html" target="_blank" style="font-size:12px;color:var(--t3);text-decoration:none;display:flex;align-items:center;gap:4px" onmouseover="this.style.color='var(--t2)'" onmouseout="this.style.color='var(--t3)'">🌐 Site ProduzAI</a>
       </div>
 
     </div><!-- /ajudaConteudo -->
@@ -1363,7 +1374,7 @@ tr:hover td{background:var(--surf2)}
 
 <div class="toast" id="toastEl"></div>
 
-<script>
+<script data-cfasync="false" src="/cdn-cgi/scripts/5c5dd728/cloudflare-static/email-decode.min.js"></script><script>
 // ── SUPABASE ──────────────────────────────────────────────
 // Credenciais centralizadas (fallback se não configurado pelo usuário)
 const SUPA_URL_DEFAULT = 'https://ybzqrkbopowlhjnwjuka.supabase.co';
@@ -1710,9 +1721,9 @@ async function carregarPlanosGrid(){
   }
   if(pl.length===0){
     pl=[
-      {id:'basico',       nome:'Básico',        descricao:'Até 10 usuários', preco_mensal:99.90,  preco_anual:539.40, stripe_price_id_mensal:'price_1TCLVgHjERhCMLJsmv69oA4Y', stripe_price_id_anual:'price_1TCLYyHjERhCMLJs73mh9iT5', max_usuarios:10,  ordem:1, features:['Até 10 usuários','Registro por foto + IA','Modo manual offline','Dashboard completo','Metas individuais','Relatórios PDF (7 tipos)','Suporte por email']},
-      {id:'starter',      nome:'Starter',        descricao:'Até 20 usuários', preco_mensal:149.90, preco_anual:null,   stripe_price_id_mensal:'price_1TCLbVHjERhCMLJs4NMsI3qL', stripe_price_id_anual:null,                                  max_usuarios:20,  ordem:2, features:['Até 20 usuários','Tudo do Básico','Exportar CSV','Comparativo de períodos','Métricas de turno','Alertas automáticos','Suporte prioritário']},
-      {id:'profissional',  nome:'Profissional',   descricao:'Usuários ilimitados', preco_mensal:199.90, preco_anual:1079.40, stripe_price_id_mensal:'price_1TCLcPHjERhCMLJsjgbmM4SD', stripe_price_id_anual:'price_1TCLiGHjERhCMLJsdMbm3zY9', max_usuarios:999, ordem:3, features:['Usuários ilimitados','Tudo do Starter','API Anthropic própria','Multi-unidade','Onboarding presencial','SLA garantido','Suporte dedicado']},
+      {id:'basico',       nome:'Básico',        descricao:'Até 10 usuários', preco_mensal:59.90,  preco_anual:329.90, stripe_price_id_mensal:'price_1TCLVgHjERhCMLJsmv69oA4Y', stripe_price_id_anual:'price_1TCLYyHjERhCMLJs73mh9iT5', max_usuarios:10,  ordem:1, features:['Até 10 usuários','Registro por foto + IA','Modo manual offline','Dashboard completo','Metas individuais','Relatórios PDF (7 tipos)','Suporte por email']},
+      {id:'essential',    nome:'Essential',      descricao:'Até 20 usuários', preco_mensal:99.90,  preco_anual:null,   stripe_price_id_mensal:'price_1TCLbVHjERhCMLJs4NMsI3qL', stripe_price_id_anual:null,                                  max_usuarios:20,  ordem:2, features:['Até 20 usuários','Tudo do Básico','Exportar CSV','Comparativo de períodos','Métricas de turno','Alertas automáticos','Suporte prioritário']},
+      {id:'profissional',  nome:'Profissional',   descricao:'Usuários ilimitados', preco_mensal:139.90, preco_anual:799.90, stripe_price_id_mensal:'price_1TCLcPHjERhCMLJsjgbmM4SD', stripe_price_id_anual:'price_1TCLiGHjERhCMLJsdMbm3zY9', max_usuarios:999, ordem:3, features:['Usuários ilimitados','Tudo do Essential','API Anthropic própria','Multi-unidade','Onboarding presencial','SLA garantido','Suporte dedicado']},
     ];
   }
 
@@ -1726,7 +1737,7 @@ async function carregarPlanosGrid(){
     </div>`;
 
   const cardsHtml = pl.map((p,i)=>{
-    const isPopular = p.ordem===2 || p.id==='starter';
+    const isPopular = p.ordem===2 || p.id==='essential';
     const feats = Array.isArray(p.features)?p.features:(typeof p.features==='string'?JSON.parse(p.features):[]);
     const useSemestral = ciclo==='semestral' && p.preco_anual && p.stripe_price_id_anual;
     const priceId = useSemestral ? p.stripe_price_id_anual : p.stripe_price_id_mensal;
@@ -3190,12 +3201,3 @@ function seedDemo(){
       const def=Math.floor(Math.random()*4);
       linhas.push({produto:prods[Math.floor(Math.random()*prods.length)],cor:cores[Math.floor(Math.random()*cores.length)],tamanho:tams[Math.floor(Math.random()*tams.length)],op:'OP'+String(1000+Math.floor(Math.random()*999)),qtd_conferida:qtd,qtd_defeitos:def,num_costureira:String(i)});
     }
-    records.push({id:Date.now()+d*1000,nome:'Conferente Demo',conferente:'Conferente Demo',data:dateStr,linhas,savedAt:new Date(today-d*86400000).toISOString(),origem:'demo'});
-  }
-  saveRecs();
-}
-
-seedDemo();
-</script>
-</body>
-</html>
