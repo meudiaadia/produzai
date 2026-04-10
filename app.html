@@ -1455,8 +1455,7 @@ window.addEventListener('load', async ()=>{
   const hash = window.location.hash;
   const hashParams = new URLSearchParams(hash.replace('#',''));
   const tipoAuth = hashParams.get('type');
-  const accessToken = hashParams.get('access_token');
-
+const accessToken = hashParams.get('access_token') || hashParams.get('token');
   // Se for link de recovery, mostrar tela de nova senha
   if(tipoAuth === 'recovery' && accessToken){
     // Setar sessão com o token
