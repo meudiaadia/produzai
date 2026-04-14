@@ -446,14 +446,16 @@ function buildSheet() {
   /* cabeçalho th */
   const thCells = activeCols.map(col => {
     const lbl = customLabels[col.id] || col.label;
-    return `<th>${lbl}</th>`;
+    const w = {produto:'22%',cor:'12%',tamanho:'7%',op:'6%',qtd_conf:'10%',qtd_def:'10%',num_cost:'9%'}[col.id]||'';
+    const shortLabel = {tamanho:'TAM.',qtd_conf:'QTD. CONF.',qtd_def:'QTD. DEF.',num_cost:'No COST.'}[col.id]||lbl;
+    return `<th${w?' style="width:'+w+'"':''}>${shortLabel}</th>`;
   }).join('');
 
   /* linhas */
   let rows = '';
   for (let i = 1; i <= nLinhas; i++) {
     const tds = activeCols.map(col => `<td class="${col.id==='obs'?'':''}"></td>`).join('');
-    rows += `<tr><td class="td-num">${i}</td>${tds}</tr>`;
+    rows += `<tr><td class="td-num" style="text-align:center"><input type="checkbox" style="width:10px;height:10px"></td>${tds}</tr>`;
   }
 
   /* linha total */
@@ -479,7 +481,7 @@ function buildSheet() {
     <table class="sheet-table">
       <thead>
         <tr>
-          <th style="width:6mm">#</th>
+         <th style="width:14mm;font-size:7px;text-align:center">LIMP.<br>EMBAL.</th>
           ${thCells}
         </tr>
       </thead>
