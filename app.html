@@ -3191,6 +3191,8 @@ function renderListaConvites(){
       '<div style="display:flex;gap:6px;align-items:center">' +
         '<input id="' + inpId + '" type="text" readonly style="flex:1;padding:6px 8px;background:var(--surf2);border:1px solid var(--b);border-radius:6px;font-size:11px;color:var(--t2);font-family:monospace">' +
         '<button id="' + btnId + '" class="btn btn-ghost btn-sm">Copiar</button>' +
+          '<button onclick="excluirConvite(this)" data-id="' + c.id + '" class="btn btn-ghost btn-sm" style="color:var(--red);border-color:var(--red)" title="Excluir">&#128465;</button>' +
+        '</div>';
       '</div>';
     cont.appendChild(div);
     document.getElementById(inpId).value = link;
@@ -3199,6 +3201,18 @@ function renderListaConvites(){
     });
   });
 }
+async function excluirConvite(btn){
+    const id = btn.getAttribute('data-id');
+    if(!confirm('Excluir este convite?')) return;
+    if(usandoSupabase()){
+      await _sb.from('convites').delete().eq('id', id).catch(()=>{});
+    }
+    const convites = JSON.parse(localStorage.getItem('produzai_convites')||'[]');
+    const novos = convites.filter(c => c.id !== id);
+    localStorage.setItem('produzai_convites', JSON.stringify(novos));
+    renderListaConvites();
+    toast('Convite excluído!');
+  }
 
 // ── PÁGINA DE CONVITE ──────────────────────────────────────
 async function verificarConviteUrl(){
