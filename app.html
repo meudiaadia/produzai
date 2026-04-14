@@ -1455,7 +1455,8 @@ window.addEventListener('load', async ()=>{
   const hash = window.location.hash;
   const hashParams = new URLSearchParams(hash.replace('#',''));
   const tipoAuth = hashParams.get('type');
-const accessToken = hashParams.get('access_token') || hashParams.get('token');
+  const accessToken = hashParams.get('access_token');
+
   // Se for link de recovery, mostrar tela de nova senha
   if(tipoAuth === 'recovery' && accessToken){
     // Setar sessão com o token
@@ -1695,7 +1696,10 @@ async function doRecovery(){
   const email=gv('recoveryEmail').trim();
   if(!email){ toast('Informe seu email'); return; }
   if(usandoSupabase()){
-await _sb.auth.resetPasswordForEmail(email, {redirectTo: 'https://produzai.tech/app'});}
+    await _sb.auth.resetPasswordForEmail(email);
+  }
+  g('recoveryMsg').style.display='block';
+}
 
 async function carregarDadosEmpresa(){
   if(!supabase||!currentUser) return;
@@ -3115,7 +3119,7 @@ async function criarConvite(){
   const email = g('adminEmail').value.trim();
   const codigo = gerarCodigo();
   const expira = new Date();
-  expira.setMonth(expira.getMonth() + 6);
+  expira.setMonth(expira.getMonth() + 12);
 
   // Salva no localStorage como fallback
   const convites = JSON.parse(localStorage.getItem('produzai_convites')||'[]');
