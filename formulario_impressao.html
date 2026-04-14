@@ -455,7 +455,7 @@ function buildSheet() {
   let rows = '';
   for (let i = 1; i <= nLinhas; i++) {
     const tds = activeCols.map(col => `<td class="${col.id==='obs'?'':''}"></td>`).join('');
-    rows += `<tr><td class="td-num" style="text-align:center"><input type="checkbox" style="width:9px;height:9px`> <input type=`checkbox` style=`width:9px;height:9px"></td>${tds}</tr>`;
+    rows += `<tr><td class="td-num" style="text-align:center"><input type="checkbox" style="width:10px;height:10px"></td>${tds}</tr>`;
   }
 
   /* linha total */
@@ -481,7 +481,7 @@ function buildSheet() {
     <table class="sheet-table">
       <thead>
         <tr>
-         <th style="width:18mm;font-size:6px;text-align:center">LIMP. / EMBAL.</th>
+         <th style="width:14mm;font-size:7px;text-align:center">LIMP.<br>EMBAL.</th>
           ${thCells}
         </tr>
       </thead>
