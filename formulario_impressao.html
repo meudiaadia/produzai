@@ -217,7 +217,7 @@
   .sig-label { font-size: 7pt; color: #666; text-transform: uppercase; letter-spacing: .04em; }
   .sheet-stamp { font-size: 6pt; color: #ccc; text-align: right; line-height: 1.6; }
 
-  @media print {
+  @media print { * { color: #000 !important; border-color: #000 !important; } 
     .screen-only { display: none !important; }
     body { background: #fff; }
     .sheet-page { width: 100%; padding: 8mm; page-break-after: always; margin: 0; min-height: auto; }
