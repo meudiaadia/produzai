@@ -1669,7 +1669,7 @@ async function doCadastro(){
 
     await carregarDadosEmpresa();
 
-    // Verificar se veio de convite — dar plano Profissional por 6 meses
+    // Verificar se veio de convite — dar plano Profissional por 1 ano
     const codigoConvite = sessionStorage.getItem('convite_codigo');
     const expiraConvite = sessionStorage.getItem('convite_expira');
     if(codigoConvite && expiraConvite && usandoSupabase()){
@@ -3247,8 +3247,9 @@ async function verificarConviteUrl(){
   // Guarda o código para usar no cadastro
   sessionStorage.setItem('convite_codigo', codigo);
   sessionStorage.setItem('convite_expira', convite.expira_em);
+      sessionStorage.setItem('convite_plano', 'profissional');
 
-  toast('Convite válido! Complete seu cadastro.');
+      toast('Convite válido! Complete seu cadastro.');
 }
 
 async function marcarConviteUsado(codigo){
