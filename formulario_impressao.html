@@ -257,20 +257,20 @@
           <div class="fields-grid" style="margin-bottom:10px">
             <div class="field-group" style="grid-column:1/-1">
               <label>Nome da empresa</label>
-              <input id="nomeEmpresa" type="text" oninput="salvarDados()" placeholder="Ex: Confecções Silva Ltda" oninput="buildPreview()">
+              <input id="nomeEmpresa" type="text" placeholder="Ex: Confecções Silva Ltda" oninput="buildPreview()">
             </div>
             <div class="field-group">
               <label>CNPJ</label>
-              <input id="cnpj" type="text" oninput="salvarDados()" placeholder="00.000.000/0001-00" oninput="buildPreview()">
+              <input id="cnpj" type="text" placeholder="00.000.000/0001-00" oninput="buildPreview()">
             </div>
             <div class="field-group">
               <label>Telefone</label>
-              <input id="telefone" type="text" oninput="salvarDados()" placeholder="(00) 00000-0000" oninput="buildPreview()">
+              <input id="telefone" type="text" placeholder="(00) 00000-0000" oninput="buildPreview()">
             </div>
           </div>
           <div class="field-group">
             <label>Endereço</label>
-            <input id="endereco" type="text" oninput="salvarDados()" placeholder="Rua, número, cidade — UF" oninput="buildPreview()">
+            <input id="endereco" type="text" placeholder="Rua, número, cidade — UF" oninput="buildPreview()">
           </div>
         </div>
       </div>
@@ -354,7 +354,7 @@ const ALL_COLS = [
 ];
 
 /* seleção padrão (replicando o formulário original) */
-carregarDados(); let selected = new Set(['produto','cor','tamanho','op','qtd_conf','qtd_def','num_cost']);
+let selected = new Set(['produto','cor','tamanho','op','qtd_conf','qtd_def','num_cost']);
 let customLabels = {};
 let logoDataUrl = null;
 
