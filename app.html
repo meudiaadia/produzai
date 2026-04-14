@@ -1695,10 +1695,7 @@ async function doRecovery(){
   const email=gv('recoveryEmail').trim();
   if(!email){ toast('Informe seu email'); return; }
   if(usandoSupabase()){
-    await _sb.auth.resetPasswordForEmail(email, {redirectTo: 'https://produzai.tech/app'});
-  }
-  g('recoveryMsg').style.display='block';
-}
+await _sb.auth.resetPasswordForEmail(email, {redirectTo: 'https://produzai.tech/app'});}
 
 async function carregarDadosEmpresa(){
   if(!supabase||!currentUser) return;
