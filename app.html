@@ -945,8 +945,8 @@ tr:hover td{background:var(--surf2)}
       </div>
     </div>
     <div class="tbl-card">
-      <table><thead><tr><th>Data</th><th>Conferente</th><th>Linhas</th><th>Peças</th><th>Defeitos</th><th>Taxa</th><th></th></tr></thead>
-      <tbody id="histBody"></tbody></table>
+      <div style="overflow-x:auto"><table><thead><tr><th>Data</th><th>Conferente</th><th>Linhas</th><th>Peças</th><th>Defeitos</th><th>Taxa</th><th></th></tr></thead>
+      <tbody id="histBody"></tbody></table></div>
     </div>
     <div id="histEmpty" style="text-align:center;padding:48px;color:var(--t3);display:none">Nenhum registro encontrado.</div>
     <!-- PAGINAÇÃO -->
@@ -2659,7 +2659,7 @@ function renderHist(){
   g('histEmpty').style.display=filtered.length===0?'block':'none';
   g('histBody').innerHTML=filtered.map(r=>{ const pecas=r.linhas.reduce((s,l)=>s+l.qtd_conferida,0); const def=r.linhas.reduce((s,l)=>s+l.qtd_defeitos,0); const taxa=pecas>0?((def/pecas)*100).toFixed(1):0; return`<tr><td>${fmtDate(r.data)}</td><td style="font-weight:500">${r.nome||'—'}</td><td class="mono">${r.linhas.length}</td><td class="mono">${pecas}</td><td class="mono">${def}</td><td><span class="tag ${parseFloat(taxa)<getTol()?'tag-green':'tag-red'}">${taxa}%</span></td><td style="display:flex;gap:4px"><button class="btn btn-ghost btn-xs" onclick="editarReg(${r.id})" title="Editar">✎</button><button class="btn btn-ghost btn-xs" style="color:var(--red)" onclick="excluirReg(${r.id})" title="Excluir">✕</button></td></tr>`; }).join('');
 }
-function excluirReg(id){ if(!confirm('Excluir este registro?')) return; records=records.filter(r=>r.id!==id); saveRecs(); renderHist(); renderDash(); toast('Registro excluído'); }
+function excluirReg(id){ if(!confirm('Excluir este registro?')) return; records=records.filter(r=>String(r.id)!==String(id)); saveRecs(); renderHist(); renderDash(); toast('Registro excluído'); }
 function editarReg(id){
   const r=records.find(x=>x.id===id); if(!r) return;
   loadReview({nome:r.nome,data:r.data,linhas:r.linhas});
