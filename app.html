@@ -752,7 +752,7 @@ tr:hover td{background:var(--surf2)}
       </div>
       <button class="add-row" onclick="addRow()">+ Adicionar linha</button>
     </div>
-    <div style="display:flex;gap:8px;align-items:center;padding:8px 0;flex-wrap:wrap">
+    <div style="display:flex;gap:8px;align-items:center;padding:10px 0;flex-wrap:wrap;position:sticky;bottom:0;background:var(--surf);border-top:1px solid var(--b);z-index:50">
       <button class="btn btn-green" onclick="saveRecord()">Salvar registro</button>
       <button class="btn btn-ghost" onclick="showPage('upload')">← Voltar</button>
       <span id="saveMsg" style="font-size:13px;color:var(--green);display:none">✓ Salvo!</span>
