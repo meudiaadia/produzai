@@ -2318,8 +2318,22 @@ async function analyzeImage(){
 }
 
 // ── REVIEW ───────────────────────────────────────────────
+function normalizarNome(nome){
+  if(!nome) return '';
+  const auxiliares=pessoas.filter(p=>p.tipo==='auxiliar').map(p=>p.nome);
+  if(!auxiliares.length) return nome;
+  let melhor=nome; let menorDist=999;
+  auxiliares.forEach(n=>{
+    const a=nome.toLowerCase(); const b=n.toLowerCase();
+    if(b.includes(a)||a.includes(b)){menorDist=0;melhor=n;return;}
+    let dist=0; const max=Math.max(a.length,b.length);
+    for(let i=0;i<max;i++) if(a[i]!==b[i]) dist++;
+    if(dist<menorDist){menorDist=dist;melhor=n;}
+  });
+  return menorDist<5?melhor:nome;
+}
 function loadReview(data){
-  g('metaNome').value=data.nome||'';
+  g('metaNome').value=normalizarNome(data.nome||'');
   g('metaData').value=(data.data&&data.data!=='YYYY-MM-DD')?data.data:new Date().toISOString().split('T')[0];
   g('reviewBody').innerHTML='';
   g('reviewBody').dataset.editId='';
