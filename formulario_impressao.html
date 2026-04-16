@@ -257,20 +257,20 @@
           <div class="fields-grid" style="margin-bottom:10px">
             <div class="field-group" style="grid-column:1/-1">
               <label>Nome da empresa</label>
-              <input id="nomeEmpresa" type="text" placeholder="Ex: Confecções Silva Ltda" oninput="buildPreview()">
+              <input id="nomeEmpresa" type="text" placeholder="Ex: Confecções Silva Ltda" oninput="salvarEmpresa();buildPreview()">
             </div>
             <div class="field-group">
               <label>CNPJ</label>
-              <input id="cnpj" type="text" placeholder="00.000.000/0001-00" oninput="buildPreview()">
+              <input id="cnpj" type="text" placeholder="00.000.000/0001-00" oninput="salvarEmpresa();buildPreview()">
             </div>
             <div class="field-group">
               <label>Telefone</label>
-              <input id="telefone" type="text" placeholder="(00) 00000-0000" oninput="buildPreview()">
+              <input id="telefone" type="text" placeholder="(00) 00000-0000" oninput="salvarEmpresa();buildPreview()">
             </div>
           </div>
           <div class="field-group">
             <label>Endereço</label>
-            <input id="endereco" type="text" placeholder="Rua, número, cidade — UF" oninput="buildPreview()">
+            <input id="endereco" type="text" placeholder="Rua, número, cidade — UF" oninput="salvarEmpresa();buildPreview()">
           </div>
         </div>
       </div>
@@ -306,11 +306,11 @@
         </div>
         <div class="field-group">
           <label>Título do formulário</label>
-          <input id="tituloForm" type="text" value="Controle de Produção" oninput="buildPreview()">
+          <input id="tituloForm" type="text" value="Controle de Produção" oninput="salvarEmpresa();buildPreview()">
         </div>
         <div class="field-group">
           <label>Cópias</label>
-          <input id="numCopias" type="number" value="1" min="1" max="20" oninput="buildPreview()">
+          <input id="numCopias" type="number" value="1" min="1" max="20" oninput="salvarEmpresa();buildPreview()">
         </div>
       </div>
     </div>
@@ -517,7 +517,7 @@ window.addEventListener('beforeprint', () => {
 });
 
 /* ── INIT ── */
-renderToggles();
+function salvarEmpresa(){localStorage.setItem("pf_nome",document.getElementById("nomeEmpresa").value);localStorage.setItem("pf_cnpj",document.getElementById("cnpj").value);localStorage.setItem("pf_tel",document.getElementById("telefone").value);localStorage.setItem("pf_end",document.getElementById("endereco").value);}function carregarEmpresa(){var n=localStorage.getItem("pf_nome");if(n)document.getElementById("nomeEmpresa").value=n;var c=localStorage.getItem("pf_cnpj");if(c)document.getElementById("cnpj").value=c;var t=localStorage.getItem("pf_tel");if(t)document.getElementById("telefone").value=t;var e=localStorage.getItem("pf_end");if(e)document.getElementById("endereco").value=e;}renderToggles();carregarEmpresa();
 buildPreview();
 </script>
 </body>
