@@ -1711,7 +1711,7 @@ async function carregarDadosEmpresa(){
 
   // carregar pessoas
   const {data:pss}=await _sb.from('pessoas').select('*').eq('empresa_id',usr.empresa_id).eq('ativo',true);
-  if(pss){ pessoas=pss; savePessoas(); }
+  if(pss){ pessoas=pss.map(p=>({...p,meta:p.meta_pecas||p.meta||"",metaForms:p.meta_forms||p.metaForms||"",tolDef:p.tol_defeitos||p.tolDef||""})); savePessoas(); }
 
   // carregar registros (últimos 90 dias)
   const noventa=new Date(Date.now()-90*864e5).toISOString().split('T')[0];
@@ -2452,8 +2452,8 @@ function salvarPessoa(){
   else { pessoas.push(obj); }
   savePessoas();
   if(usandoSupabase()&&empresa.id){
-    if(editingId){ _sb.from('pessoas').update({tipo:obj.tipo,nome:obj.nome,num:obj.num,meta:obj.meta,meta_forms:obj.metaForms,tol_def:obj.tolDef,obs:obj.obs,ativo:true}).eq('id',String(editingId)).then(); }
-    else { _sb.from('pessoas').insert({id:String(obj.id),empresa_id:empresa.id,tipo:obj.tipo,nome:obj.nome,num:obj.num,meta:obj.meta,meta_forms:obj.metaForms,tol_def:obj.tolDef,obs:obj.obs,ativo:true}).then(); }
+    if(editingId){ _sb.from('pessoas').update({tipo:obj.tipo,nome:obj.nome,num:obj.num,meta_pecas:obj.meta,meta_forms:obj.metaForms,tol_defeitos:obj.tolDef,obs:obj.obs,ativo:true}).eq('id',String(editingId)).then(); }
+    else { _sb.from('pessoas').insert({id:String(obj.id),empresa_id:empresa.id,tipo:obj.tipo,nome:obj.nome,num:obj.num,meta_pecas:obj.meta,meta_forms:obj.metaForms,tol_defeitos:obj.tolDef,obs:obj.obs,ativo:true}).then(); }
   }
   g('modalPessoa').classList.remove('open'); renderMetas(); toast('Salvo!');
 }
