@@ -2448,7 +2448,7 @@ function openModal(tipo, id=null){
 function salvarPessoa(){
   const nome=gv('pessoaNome').trim(); if(!nome){ toast('Informe o nome'); return; }
   const obj={ id:editingId||Date.now(), tipo:modalTipo, nome, num:gv('pessoaNum').trim(), meta:gv('pessoaMeta'), metaForms:gv('pessoaMetaForms'), tolDef:gv('pessoaTolDef'), obs:gv('pessoaObs') };
-  if(editingId){ pessoas=pessoas.map(p=>p.id===editingId?obj:p); }
+  if(editingId){ pessoas=pessoas.map(p=>String(p.id)===String(editingId)?obj:p); }
   else { pessoas.push(obj); }
   savePessoas(); g('modalPessoa').classList.remove('open'); renderMetas(); toast('Salvo!');
 }
