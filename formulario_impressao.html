@@ -481,24 +481,31 @@ function buildSheet() {
   // Checkboxes de tamanhos
   const tamBoxes = tamanhos.map(t => '<span class="cb-item"><span class="cb-box"></span>'+t+'</span>').join('');
 
-  // Campos extras com linha
-  const extraFields = camposExtras.map(f =>
-    '<span class="extra-field"><span class="extra-label">'+f+':</span><span class="extra-line"></span></span>'
-  ).join('');
-
-  // Campos fixos condicionais: Qtd, Defeitos, Operador
-  const labelQtd = customLabels['qtd_conf']||'Qtd. Conferida';
-  const labelDef = customLabels['qtd_def']||'Qtd. Defeitos';
+  // Campos condicionais todos na mesma linha: OP, Lote, Turno, Hora + Qtd + Defeitos
+  const labelQtd = customLabels['qtd_conf']||'Qtd. Conf.';
+  const labelDef = customLabels['qtd_def']||'Defeitos';
   const labelOp  = customLabels['operador']||'Nome do Operador';
   const showQtd  = selected.has('qtd_conf');
   const showDef  = selected.has('qtd_def');
   const showOp   = selected.has('operador');
 
-  const camposRow = (showQtd || showDef || showOp) ?
+  const linhaFields = [];
+  if(selected.has('op'))       linhaFields.push(customLabels['op']||'OP');
+  if(selected.has('lote'))     linhaFields.push(customLabels['lote']||'Lote');
+  if(selected.has('turno'))    linhaFields.push(customLabels['turno']||'Turno');
+  if(selected.has('hora_ini')) linhaFields.push(customLabels['hora_ini']||'Hora Início');
+  if(selected.has('hora_fim')) linhaFields.push(customLabels['hora_fim']||'Hora Fim');
+  if(showQtd) linhaFields.push(labelQtd);
+  if(showDef) linhaFields.push(labelDef);
+
+  const linhaFieldsHtml = linhaFields.map(f =>
+    '<span class="campo-fixo"><span class="campo-label">'+f+':</span><span class="extra-line"></span></span>'
+  ).join('');
+
+  const camposRow = (linhaFields.length || showOp) ?
     '<div class="campos-row">'+
-      (showQtd ? '<span class="campo-fixo"><span class="campo-label">'+labelQtd+':</span><span class="campo-line"></span></span>' : '')+
-      (showDef ? '<span class="campo-fixo"><span class="campo-label">'+labelDef+':</span><span class="campo-line"></span></span>' : '')+
-      (showOp  ? '<span class="campo-fixo campo-wide"><span class="campo-label">'+labelOp+':</span><span class="campo-line"></span></span>' : '')+
+      linhaFieldsHtml+
+      (showOp ? '<span class="campo-fixo campo-wide"><span class="campo-label">'+labelOp+':</span><span class="campo-line"></span></span>' : '')+
     '</div>' : '';
 
   // Bloco de 1 registro
@@ -506,7 +513,6 @@ function buildSheet() {
     '<div class="cb-row"><span class="cb-label">Modelo:</span><span class="cb-options">'+prodBoxes+'</span></div>'+
     '<div class="cb-row"><span class="cb-label">Cor:</span><span class="cb-options">'+corBoxes+'</span></div>'+
     '<div class="cb-row"><span class="cb-label">Tamanho:</span><span class="cb-options">'+tamBoxes+'</span></div>'+
-    (extraFields ? '<div class="extra-row">'+extraFields+'</div>' : '')+
     camposRow+
   '</div>';
 
