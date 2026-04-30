@@ -86,7 +86,7 @@ body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--t);min-he
 
 /* LAYOUT */
 .main{max-width:960px;margin:0 auto;padding:24px 16px}
-.page{display:none}.page.active{display:block;min-height:calc(100vh - 56px);overflow-y:auto;-webkit-overflow-scrolling:touch}
+.page{display:none}.page.active{display:block;min-height:calc(100vh - 56px);overflow-y:auto}
 
 /* CARDS */
 .card{background:var(--surf);border:1px solid var(--b);border-radius:var(--rl);padding:20px;margin-bottom:14px}
@@ -179,7 +179,7 @@ body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--t);min-he
   .co-name-text{display:none}
   
   /* Ajustar padding das páginas para não cobrir nav inferior */
-  .page.active .main{padding-bottom:140px}
+  .page.active .main{padding-bottom:90px}
   /* Garantir scroll em todas as páginas no mobile */
   .page.active{overflow-y:auto;-webkit-overflow-scrolling:touch;height:calc(100vh - 50px)}
   
@@ -738,7 +738,7 @@ tr:hover td{background:var(--surf2)}
   <div class="main">
     <div style="display:flex;align-items:center;gap:10px;margin-bottom:16px">
       <div style="font-size:17px;font-weight:600" id="reviewTitle">Revisar dados extraídos</div>
-      <span class="tag tag-green" id="reviewBadge">Pronto para salvar</span><button class="btn btn-green" style="margin-left:auto" onclick="saveRecord()">Salvar</button>
+      <span class="tag tag-green" id="reviewBadge">Pronto para salvar</span>
     </div>
     <div class="review-meta">
       <div class="fg"><label>Conferente</label><input id="metaNome" type="text" placeholder="Nome"></div>
@@ -752,7 +752,7 @@ tr:hover td{background:var(--surf2)}
       </div>
       <button class="add-row" onclick="addRow()">+ Adicionar linha</button>
     </div>
-    <div style="display:flex;gap:8px;align-items:center;padding:10px 0;flex-wrap:wrap;position:sticky;bottom:0;background:var(--surf);border-top:1px solid var(--b);z-index:50">
+    <div style="display:flex;gap:8px;align-items:center;padding:8px 0">
       <button class="btn btn-green" onclick="saveRecord()">Salvar registro</button>
       <button class="btn btn-ghost" onclick="showPage('upload')">← Voltar</button>
       <span id="saveMsg" style="font-size:13px;color:var(--green);display:none">✓ Salvo!</span>
@@ -945,8 +945,8 @@ tr:hover td{background:var(--surf2)}
       </div>
     </div>
     <div class="tbl-card">
-      <div style="overflow-x:auto"><table><thead><tr><th>Data</th><th>Conferente</th><th>Linhas</th><th>Peças</th><th>Defeitos</th><th>Taxa</th><th></th></tr></thead>
-      <tbody id="histBody"></tbody></table></div>
+      <table><thead><tr><th>Data</th><th>Conferente</th><th>Linhas</th><th>Peças</th><th>Defeitos</th><th>Taxa</th><th></th></tr></thead>
+      <tbody id="histBody"></tbody></table>
     </div>
     <div id="histEmpty" style="text-align:center;padding:48px;color:var(--t3);display:none">Nenhum registro encontrado.</div>
     <!-- PAGINAÇÃO -->
@@ -1034,6 +1034,30 @@ tr:hover td{background:var(--surf2)}
         <button class="btn btn-primary btn-sm" onclick="adicionarProduto()">+ Adicionar</button>
       </div>
       <div id="listaProdutos" style="display:flex;flex-wrap:wrap;gap:6px;min-height:24px"></div>
+    </div>
+
+    <!-- CORES -->
+    <div class="card">
+      <div class="card-title">Cores cadastradas
+        <span style="font-size:11px;font-weight:400;color:var(--t3);text-transform:none;letter-spacing:0">Aparecem no formulário de impressão</span>
+      </div>
+      <div style="display:flex;gap:8px;margin-bottom:12px">
+        <div class="fg" style="flex:1"><input id="novaCor" placeholder="Ex: Azul Royal, Preto, Off White..." onkeydown="if(event.key==='Enter')adicionarCor()"></div>
+        <button class="btn btn-primary btn-sm" onclick="adicionarCor()">+ Adicionar</button>
+      </div>
+      <div id="listaCores" style="display:flex;flex-wrap:wrap;gap:6px;min-height:24px"></div>
+    </div>
+
+    <!-- TAMANHOS -->
+    <div class="card">
+      <div class="card-title">Tamanhos cadastrados
+        <span style="font-size:11px;font-weight:400;color:var(--t3);text-transform:none;letter-spacing:0">Aparecem no formulário de impressão</span>
+      </div>
+      <div style="display:flex;gap:8px;margin-bottom:12px">
+        <div class="fg" style="flex:1"><input id="novoTam" placeholder="Ex: PP, P, M, G, GG, 36, 38, 40..." onkeydown="if(event.key==='Enter')adicionarTamanho()"></div>
+        <button class="btn btn-primary btn-sm" onclick="adicionarTamanho()">+ Adicionar</button>
+      </div>
+      <div id="listaTamanhos" style="display:flex;flex-wrap:wrap;gap:6px;min-height:24px"></div>
     </div>
 
     <div class="card">
@@ -1669,7 +1693,7 @@ async function doCadastro(){
 
     await carregarDadosEmpresa();
 
-    // Verificar se veio de convite — dar plano Profissional por 1 ano
+    // Verificar se veio de convite — dar plano Profissional por 6 meses
     const codigoConvite = sessionStorage.getItem('convite_codigo');
     const expiraConvite = sessionStorage.getItem('convite_expira');
     if(codigoConvite && expiraConvite && usandoSupabase()){
@@ -1711,7 +1735,7 @@ async function carregarDadosEmpresa(){
 
   // carregar pessoas
   const {data:pss}=await _sb.from('pessoas').select('*').eq('empresa_id',usr.empresa_id).eq('ativo',true);
-  if(pss){ pessoas=pss.map(p=>({...p,meta:p.meta_pecas||p.meta||"",metaForms:p.meta_forms||p.metaForms||"",tolDef:p.tol_defeitos||p.tolDef||""})); savePessoas(); }
+  if(pss){ pessoas=pss; savePessoas(); }
 
   // carregar registros (últimos 90 dias)
   const noventa=new Date(Date.now()-90*864e5).toISOString().split('T')[0];
@@ -2318,22 +2342,8 @@ async function analyzeImage(){
 }
 
 // ── REVIEW ───────────────────────────────────────────────
-function normalizarNome(nome){
-  if(!nome) return '';
-  const auxiliares=pessoas.filter(p=>p.tipo==='auxiliar').map(p=>p.nome);
-  if(!auxiliares.length) return nome;
-  let melhor=nome; let menorDist=999;
-  auxiliares.forEach(n=>{
-    const a=nome.toLowerCase(); const b=n.toLowerCase();
-    if(b.includes(a)||a.includes(b)){menorDist=0;melhor=n;return;}
-    let dist=0; const max=Math.max(a.length,b.length);
-    for(let i=0;i<max;i++) if(a[i]!==b[i]) dist++;
-    if(dist<menorDist){menorDist=dist;melhor=n;}
-  });
-  return menorDist<5?melhor:nome;
-}
 function loadReview(data){
-  g('metaNome').value=normalizarNome(data.nome||'');
+  g('metaNome').value=data.nome||'';
   g('metaData').value=(data.data&&data.data!=='YYYY-MM-DD')?data.data:new Date().toISOString().split('T')[0];
   g('reviewBody').innerHTML='';
   g('reviewBody').dataset.editId='';
@@ -2448,14 +2458,9 @@ function openModal(tipo, id=null){
 function salvarPessoa(){
   const nome=gv('pessoaNome').trim(); if(!nome){ toast('Informe o nome'); return; }
   const obj={ id:editingId||Date.now(), tipo:modalTipo, nome, num:gv('pessoaNum').trim(), meta:gv('pessoaMeta'), metaForms:gv('pessoaMetaForms'), tolDef:gv('pessoaTolDef'), obs:gv('pessoaObs') };
-  if(editingId){ pessoas=pessoas.map(p=>String(p.id)===String(editingId)?obj:p); }
+  if(editingId){ pessoas=pessoas.map(p=>p.id===editingId?obj:p); }
   else { pessoas.push(obj); }
-  savePessoas();
-  if(usandoSupabase()&&empresa.id){
-    if(editingId){ _sb.from('pessoas').update({tipo:obj.tipo,nome:obj.nome,num:obj.num,meta_pecas:obj.meta,meta_forms:obj.metaForms,tol_defeitos:obj.tolDef,obs:obj.obs,ativo:true}).eq('id',String(editingId)).then(); }
-    else { _sb.from('pessoas').insert({id:String(obj.id),empresa_id:empresa.id,tipo:obj.tipo,nome:obj.nome,num:obj.num,meta_pecas:obj.meta,meta_forms:obj.metaForms,tol_defeitos:obj.tolDef,obs:obj.obs,ativo:true}).then(); }
-  }
-  g('modalPessoa').classList.remove('open'); renderMetas(); toast('Salvo!');
+  savePessoas(); g('modalPessoa').classList.remove('open'); renderMetas(); toast('Salvo!');
 }
 function excluirPessoa(id){ if(!confirm('Excluir este cadastro?')) return; pessoas=pessoas.filter(p=>p.id!==id); savePessoas(); renderMetas(); toast('Removido'); }
 
@@ -2557,7 +2562,7 @@ function renderMetas(){
 }
 
 // ── DASHBOARD ────────────────────────────────────────────
-function renderAll(){ renderDash(); renderHistPage(); renderConfig(); populateDashCost(); loadSavedLogo(); renderListaProdutos(); registrarServiceWorker(); }
+function renderAll(){ renderDash(); renderHistPage(); renderConfig(); populateDashCost(); loadSavedLogo(); renderListaProdutos(); renderListaCores(); renderListaTamanhos(); registrarServiceWorker(); }
 function dashTab(name,el){
   ['costureira','qualidade','produto','evolucao','turno','comparativo','ranking','auxiliar'].forEach(t=>g('dash-'+t).style.display=t===name?'block':'none');
   if(name==='ranking') renderComparativoOperadores();
@@ -2678,7 +2683,7 @@ function renderHist(){
   g('histEmpty').style.display=filtered.length===0?'block':'none';
   g('histBody').innerHTML=filtered.map(r=>{ const pecas=r.linhas.reduce((s,l)=>s+l.qtd_conferida,0); const def=r.linhas.reduce((s,l)=>s+l.qtd_defeitos,0); const taxa=pecas>0?((def/pecas)*100).toFixed(1):0; return`<tr><td>${fmtDate(r.data)}</td><td style="font-weight:500">${r.nome||'—'}</td><td class="mono">${r.linhas.length}</td><td class="mono">${pecas}</td><td class="mono">${def}</td><td><span class="tag ${parseFloat(taxa)<getTol()?'tag-green':'tag-red'}">${taxa}%</span></td><td style="display:flex;gap:4px"><button class="btn btn-ghost btn-xs" onclick="editarReg(${r.id})" title="Editar">✎</button><button class="btn btn-ghost btn-xs" style="color:var(--red)" onclick="excluirReg(${r.id})" title="Excluir">✕</button></td></tr>`; }).join('');
 }
-function excluirReg(id){ if(!confirm('Excluir este registro?')) return; records=records.filter(r=>String(r.id)!==String(id)); saveRecs(); renderHist(); renderDash(); toast('Registro excluído'); }
+function excluirReg(id){ if(!confirm('Excluir este registro?')) return; records=records.filter(r=>r.id!==id); saveRecs(); renderHist(); renderDash(); toast('Registro excluído'); }
 function editarReg(id){
   const r=records.find(x=>x.id===id); if(!r) return;
   loadReview({nome:r.nome,data:r.data,linhas:r.linhas});
@@ -3036,6 +3041,46 @@ function renderListaProdutos(){
   el.innerHTML=produtosCadastrados.map(p=>`<div style="display:flex;align-items:center;gap:5px;padding:4px 10px;background:var(--surf2);border:1px solid var(--b);border-radius:20px;font-size:12px"><span>${p}</span><span style="cursor:pointer;color:var(--t3);font-size:14px;line-height:1" onclick="removerProduto('${p.replace(/'/g,"\\'")}')">×</span></div>`).join('');
 }
 
+// ── CORES ─────────────────────────────────────────────────
+let coresCadastradas = JSON.parse(localStorage.getItem('produzai_cores')||'["Azul","Preto","Branco","Cinza","Vermelho","Verde","Rosa","Amarelo"]');
+function adicionarCor(){
+  const v=gv('novaCor').trim(); if(!v){ toast('Digite a cor'); return; }
+  if(coresCadastradas.includes(v)){ toast('Já cadastrada'); return; }
+  coresCadastradas.push(v);
+  localStorage.setItem('produzai_cores',JSON.stringify(coresCadastradas));
+  g('novaCor').value=''; renderListaCores(); toast('Cor adicionada!');
+}
+function removerCor(nome){
+  coresCadastradas=coresCadastradas.filter(c=>c!==nome);
+  localStorage.setItem('produzai_cores',JSON.stringify(coresCadastradas));
+  renderListaCores();
+}
+function renderListaCores(){
+  const el=g('listaCores'); if(!el) return;
+  if(!coresCadastradas.length){ el.innerHTML='<span style="font-size:12px;color:var(--t3)">Nenhuma cor cadastrada.</span>'; return; }
+  el.innerHTML=coresCadastradas.map(c=>`<div style="display:flex;align-items:center;gap:5px;padding:4px 10px;background:var(--surf2);border:1px solid var(--b);border-radius:20px;font-size:12px"><span>${c}</span><span style="cursor:pointer;color:var(--t3);font-size:14px;line-height:1" onclick="removerCor('${c.replace(/'/g,"\\'")}')">×</span></div>`).join('');
+}
+
+// ── TAMANHOS ──────────────────────────────────────────────
+let tamanhosCadastrados = JSON.parse(localStorage.getItem('produzai_tams')||'["PP","P","M","G","GG","XG"]');
+function adicionarTamanho(){
+  const v=gv('novoTam').trim(); if(!v){ toast('Digite o tamanho'); return; }
+  if(tamanhosCadastrados.includes(v)){ toast('Já cadastrado'); return; }
+  tamanhosCadastrados.push(v);
+  localStorage.setItem('produzai_tams',JSON.stringify(tamanhosCadastrados));
+  g('novoTam').value=''; renderListaTamanhos(); toast('Tamanho adicionado!');
+}
+function removerTamanho(nome){
+  tamanhosCadastrados=tamanhosCadastrados.filter(t=>t!==nome);
+  localStorage.setItem('produzai_tams',JSON.stringify(tamanhosCadastrados));
+  renderListaTamanhos();
+}
+function renderListaTamanhos(){
+  const el=g('listaTamanhos'); if(!el) return;
+  if(!tamanhosCadastrados.length){ el.innerHTML='<span style="font-size:12px;color:var(--t3)">Nenhum tamanho cadastrado.</span>'; return; }
+  el.innerHTML=tamanhosCadastrados.map(t=>`<div style="display:flex;align-items:center;gap:5px;padding:4px 10px;background:var(--surf2);border:1px solid var(--b);border-radius:20px;font-size:12px"><span>${t}</span><span style="cursor:pointer;color:var(--t3);font-size:14px;line-height:1" onclick="removerTamanho('${t.replace(/'/g,"\\'")}')">×</span></div>`).join('');
+}
+
 // ── FORMULÁRIO DE IMPRESSÃO ───────────────────────────────
 function abrirFormularioImpressao(){
   window.open('formulario_impressao.html','_blank');
@@ -3138,7 +3183,7 @@ async function criarConvite(){
   const email = g('adminEmail').value.trim();
   const codigo = gerarCodigo();
   const expira = new Date();
-  expira.setMonth(expira.getMonth() + 12);
+  expira.setMonth(expira.getMonth() + 6);
 
   // Salva no localStorage como fallback
   const convites = JSON.parse(localStorage.getItem('produzai_convites')||'[]');
@@ -3210,8 +3255,6 @@ function renderListaConvites(){
       '<div style="display:flex;gap:6px;align-items:center">' +
         '<input id="' + inpId + '" type="text" readonly style="flex:1;padding:6px 8px;background:var(--surf2);border:1px solid var(--b);border-radius:6px;font-size:11px;color:var(--t2);font-family:monospace">' +
         '<button id="' + btnId + '" class="btn btn-ghost btn-sm">Copiar</button>' +
-          '<button onclick="excluirConvite(this)" data-id="' + c.id + '" class="btn btn-ghost btn-sm" style="color:var(--red);border-color:var(--red)" title="Excluir">&#128465;</button>' +
-        '</div>';
       '</div>';
     cont.appendChild(div);
     document.getElementById(inpId).value = link;
@@ -3220,18 +3263,6 @@ function renderListaConvites(){
     });
   });
 }
-async function excluirConvite(btn){
-    const id = btn.getAttribute('data-id');
-    if(!confirm('Excluir este convite?')) return;
-    if(usandoSupabase()){
-      await _sb.from('convites').delete().eq('id', id).catch(()=>{});
-    }
-    const convites = JSON.parse(localStorage.getItem('produzai_convites')||'[]');
-    const novos = convites.filter(c => c.id !== id);
-    localStorage.setItem('produzai_convites', JSON.stringify(novos));
-    renderListaConvites();
-    toast('Convite excluído!');
-  }
 
 // ── PÁGINA DE CONVITE ──────────────────────────────────────
 async function verificarConviteUrl(){
@@ -3266,9 +3297,8 @@ async function verificarConviteUrl(){
   // Guarda o código para usar no cadastro
   sessionStorage.setItem('convite_codigo', codigo);
   sessionStorage.setItem('convite_expira', convite.expira_em);
-      sessionStorage.setItem('convite_plano', 'profissional');
 
-      toast('Convite válido! Complete seu cadastro.');
+  toast('Convite válido! Complete seu cadastro.');
 }
 
 async function marcarConviteUsado(codigo){

@@ -17,6 +17,23 @@
 
   .screen-only { display: block; }
 
+  /* Blocos de registro */
+  .registro-bloco{border:1px solid #ccc;border-radius:4px;padding:5px 8px;margin-bottom:4px;page-break-inside:avoid}
+  .cb-row{display:flex;align-items:flex-start;gap:6px;margin-bottom:3px;font-size:8.5pt}
+  .cb-label{font-weight:600;white-space:nowrap;min-width:60px;padding-top:1px}
+  .cb-options{display:flex;flex-wrap:wrap;gap:4px 10px}
+  .cb-item{display:flex;align-items:center;gap:3px;white-space:nowrap}
+  .cb-box{display:inline-block;width:10px;height:10px;border:1px solid #333;border-radius:1px;flex-shrink:0}
+  .extra-row{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:3px;font-size:8.5pt}
+  .extra-field{display:flex;align-items:center;gap:4px}
+  .extra-label{font-weight:600;white-space:nowrap;font-size:8pt}
+  .extra-line{display:inline-block;border-bottom:1px solid #333;min-width:25mm}
+  .campos-row{display:flex;gap:8px;flex-wrap:wrap;margin-top:3px;font-size:8.5pt}
+  .campo-fixo{display:flex;align-items:center;gap:4px}
+  .campo-wide{flex:1}
+  .campo-label{font-weight:600;white-space:nowrap;font-size:8pt}
+  .campo-line{display:inline-block;border-bottom:1px solid #333;min-width:20mm;flex:1}
+
   .topbar {
     background: var(--surface); border-bottom: 1px solid var(--border);
     padding: 0 24px; height: 56px;
@@ -217,7 +234,7 @@
   .sig-label { font-size: 7pt; color: #666; text-transform: uppercase; letter-spacing: .04em; }
   .sheet-stamp { font-size: 6pt; color: #ccc; text-align: right; line-height: 1.6; }
 
-  @media print { * { color: #000 !important; border-color: #000 !important; } 
+  @media print {
     .screen-only { display: none !important; }
     body { background: #fff; }
     .sheet-page { width: 100%; padding: 8mm; page-break-after: always; margin: 0; min-height: auto; }
@@ -257,20 +274,20 @@
           <div class="fields-grid" style="margin-bottom:10px">
             <div class="field-group" style="grid-column:1/-1">
               <label>Nome da empresa</label>
-              <input id="nomeEmpresa" type="text" placeholder="Ex: Confecções Silva Ltda" oninput="salvarEmpresa();buildPreview()">
+              <input id="nomeEmpresa" type="text" placeholder="Ex: Confecções Silva Ltda" oninput="buildPreview()">
             </div>
             <div class="field-group">
               <label>CNPJ</label>
-              <input id="cnpj" type="text" placeholder="00.000.000/0001-00" oninput="salvarEmpresa();buildPreview()">
+              <input id="cnpj" type="text" placeholder="00.000.000/0001-00" oninput="buildPreview()">
             </div>
             <div class="field-group">
               <label>Telefone</label>
-              <input id="telefone" type="text" placeholder="(00) 00000-0000" oninput="salvarEmpresa();buildPreview()">
+              <input id="telefone" type="text" placeholder="(00) 00000-0000" oninput="buildPreview()">
             </div>
           </div>
           <div class="field-group">
             <label>Endereço</label>
-            <input id="endereco" type="text" placeholder="Rua, número, cidade — UF" oninput="salvarEmpresa();buildPreview()">
+            <input id="endereco" type="text" placeholder="Rua, número, cidade — UF" oninput="buildPreview()">
           </div>
         </div>
       </div>
@@ -296,21 +313,22 @@
       <div class="card-title">Configurações de impressão</div>
       <div class="fields-grid three">
         <div class="field-group">
-          <label>Linhas por folha</label>
+          <label>Registros por folha</label>
           <select id="numLinhas" onchange="buildPreview()">
-            <option value="25">25 linhas</option>
-            <option value="30">30 linhas</option>
-            <option value="35" selected>35 linhas</option>
-            <option value="40">40 linhas</option>
+            <option value="5">5 registros</option>
+            <option value="6">6 registros</option>
+            <option value="7">7 registros</option>
+            <option value="8" selected>8 registros</option>
+            <option value="10">10 registros</option>
           </select>
         </div>
         <div class="field-group">
           <label>Título do formulário</label>
-          <input id="tituloForm" type="text" value="Controle de Produção" oninput="salvarEmpresa();buildPreview()">
+          <input id="tituloForm" type="text" value="Controle de Produção" oninput="buildPreview()">
         </div>
         <div class="field-group">
           <label>Cópias</label>
-          <input id="numCopias" type="number" value="1" min="1" max="20" oninput="salvarEmpresa();buildPreview()">
+          <input id="numCopias" type="number" value="1" min="1" max="20" oninput="buildPreview()">
         </div>
       </div>
     </div>
@@ -432,74 +450,84 @@ function buildSheet() {
   const tel    = g('telefone');
   const end    = g('endereco');
   const titulo = g('tituloForm') || 'Controle de Produção';
-  const nLinhas = parseInt(g('numLinhas')) || 35;
 
-  const infoLine = [cnpj&&`CNPJ: ${cnpj}`, tel&&`Tel: ${tel}`, end].filter(Boolean).join(' · ');
+  const infoLine = [cnpj&&'CNPJ: '+cnpj, tel&&'Tel: '+tel, end].filter(Boolean).join(' · ');
   const logoHtml = logoDataUrl
-    ? `<img src="${logoDataUrl}" style="max-width:100%;max-height:100%;object-fit:contain">`
-    : `<div class="sheet-logo-placeholder">LOGO</div>`;
+    ? '<img src="'+logoDataUrl+'" style="max-width:100%;max-height:100%;object-fit:contain">'
+    : '<div class="sheet-logo-placeholder">LOGO</div>';
 
-  /* colunas ativas na ordem definida */
-  const activeCols = ALL_COLS.filter(c => selected.has(c.id));
-  const totalCols  = activeCols.filter(c => c.hasTotal);
+  // Buscar dados do localStorage (cadastrados no app)
+  const produtos = JSON.parse(localStorage.getItem('produzai_prods')||'[]');
+  const cores    = JSON.parse(localStorage.getItem('produzai_cores')||'["Azul","Preto","Branco","Cinza","Vermelho","Verde","Rosa","Amarelo"]');
+  const tamanhos = JSON.parse(localStorage.getItem('produzai_tams')||'["PP","P","M","G","GG","XG"]');
 
-  /* cabeçalho th */
-  const thCells = activeCols.map(col => {
-    const lbl = customLabels[col.id] || col.label;
-    const w = {produto:'22%',cor:'12%',tamanho:'7%',op:'6%',qtd_conf:'10%',qtd_def:'10%',num_cost:'9%'}[col.id]||'';
-    const shortLabel = {tamanho:'TAM.',qtd_conf:'QTD. CONF.',qtd_def:'QTD. DEF.',num_cost:'No COST.'}[col.id]||lbl;
-    return `<th${w?' style="width:'+w+'"':''}>${shortLabel}</th>`;
-  }).join('');
+  // Campos extras configurados
+  const camposExtras = [];
+  if(selected.has('op'))       camposExtras.push(customLabels['op']||'OP');
+  if(selected.has('lote'))     camposExtras.push(customLabels['lote']||'Lote');
+  if(selected.has('turno'))    camposExtras.push(customLabels['turno']||'Turno');
+  if(selected.has('hora_ini')) camposExtras.push(customLabels['hora_ini']||'Hora Início');
+  if(selected.has('hora_fim')) camposExtras.push(customLabels['hora_fim']||'Hora Fim');
 
-  /* linhas */
-  let rows = '';
-  for (let i = 1; i <= nLinhas; i++) {
-    const tds = activeCols.map(col => `<td class="${col.id==='obs'?'':''}"></td>`).join('');
-    rows += `<tr><td class="td-num" style="text-align:center"><input type="checkbox" style="width:9px;height:9px">&nbsp;&nbsp;<input type="checkbox" style="width:9px;height:9px"></td>${tds}</tr>`;
-  }
+  // Checkboxes de produtos
+  const prodBoxes = produtos.length > 0
+    ? produtos.map(p => '<span class="cb-item"><span class="cb-box"></span>'+p+'</span>').join('')
+    : '<span style="color:#999;font-size:9pt">Cadastre produtos no app</span>';
 
-  /* linha total */
-  const totalTds = activeCols.map(col =>
-    `<td class="${col.hasTotal?'':'no-total'}"></td>`
+  // Checkboxes de cores
+  const corBoxes = cores.map(c => '<span class="cb-item"><span class="cb-box"></span>'+c+'</span>').join('');
+
+  // Checkboxes de tamanhos
+  const tamBoxes = tamanhos.map(t => '<span class="cb-item"><span class="cb-box"></span>'+t+'</span>').join('');
+
+  // Campos extras com linha
+  const extraFields = camposExtras.map(f =>
+    '<span class="extra-field"><span class="extra-label">'+f+':</span><span class="extra-line"></span></span>'
   ).join('');
 
-  return `<div class="sheet-page">
-    <div class="sheet-header">
-      <div class="sheet-logo">${logoHtml}</div>
-      <div class="sheet-company">
-        <div class="emp-nome">${nome}</div>
-        ${infoLine ? `<div class="emp-info">${infoLine}</div>` : ''}
-      </div>
-      <div class="sheet-meta">
-        <div class="sheet-meta-row"><span>Nome</span><div class="meta-line"></div></div>
-        <div class="sheet-meta-row"><span>Data</span><div class="meta-line" style="min-width:32mm"></div></div>
-      </div>
-    </div>
+  // Campos fixos: Qtd, Defeitos, Operador
+  const labelQtd = customLabels['qtd_conf']||'Qtd. Conferida';
+  const labelDef = customLabels['qtd_def']||'Qtd. Defeitos';
+  const labelOp  = customLabels['operador']||'Nome do Operador';
 
-    <div class="sheet-title">${titulo}</div>
+  // Bloco de 1 registro
+  const bloco = '<div class="registro-bloco">'+
+    '<div class="cb-row"><span class="cb-label">Modelo:</span><span class="cb-options">'+prodBoxes+'</span></div>'+
+    '<div class="cb-row"><span class="cb-label">Cor:</span><span class="cb-options">'+corBoxes+'</span></div>'+
+    '<div class="cb-row"><span class="cb-label">Tamanho:</span><span class="cb-options">'+tamBoxes+'</span></div>'+
+    (extraFields ? '<div class="extra-row">'+extraFields+'</div>' : '')+
+    '<div class="campos-row">'+
+      '<span class="campo-fixo"><span class="campo-label">'+labelQtd+':</span><span class="campo-line"></span></span>'+
+      '<span class="campo-fixo"><span class="campo-label">'+labelDef+':</span><span class="campo-line"></span></span>'+
+      '<span class="campo-fixo campo-wide"><span class="campo-label">'+labelOp+':</span><span class="campo-line"></span></span>'+
+    '</div>'+
+  '</div>';
 
-    <table class="sheet-table">
-      <thead>
-        <tr>
-         <th style="width:12mm;font-size:8px;text-align:center">LIMP. / EMBAL.</th>
-          ${thCells}
-        </tr>
-      </thead>
-      <tbody>
-        ${rows}
-        ${totalCols.length > 0 ? `<tr class="total-row">
-          <th colspan="${activeCols.length - totalCols.length + 1}" style="text-align:right;padding-right:3mm">TOTAL</th>
-          ${totalTds.split('</td>').slice(activeCols.length - totalCols.length).join('</td>')}
-        </tr>` : ''}
-      </tbody>
-    </table>
+  // Calcular quantos blocos cabem (estimativa: cada bloco ~28mm, folha útil ~250mm)
+  const nBlocos = parseInt(g('numLinhas')) || 8;
+  let blocos = '';
+  for(let i=0;i<nBlocos;i++) blocos += bloco;
 
-    <div class="sheet-footer">
-      <div class="sig-block"><div class="sig-line"></div><div class="sig-label">Assinatura do responsável</div></div>
-      <div class="sig-block"><div class="sig-line"></div><div class="sig-label">Conferido por</div></div>
-      <div class="sheet-stamp">${titulo}<br>${new Date().getFullYear()}</div>
-    </div>
-  </div>`;
+  return '<div class="sheet-page">'+
+    '<div class="sheet-header">'+
+      '<div class="sheet-logo">'+logoHtml+'</div>'+
+      '<div class="sheet-company">'+
+        '<div class="emp-nome">'+nome+'</div>'+
+        (infoLine ? '<div class="emp-info">'+infoLine+'</div>' : '')+
+      '</div>'+
+      '<div class="sheet-meta">'+
+        '<div class="sheet-meta-row"><span>Conferente</span><div class="meta-line"></div></div>'+
+        '<div class="sheet-meta-row"><span>Data</span><div class="meta-line" style="min-width:32mm"></div></div>'+
+      '</div>'+
+    '</div>'+
+    '<div class="sheet-title">'+titulo+'</div>'+
+    blocos+
+    '<div class="sheet-footer">'+
+      '<div class="sig-block"><div class="sig-line"></div><div class="sig-label">Assinatura do responsável</div></div>'+
+      '<div class="sig-block"><div class="sig-line"></div><div class="sig-label">Visto do supervisor</div></div>'+
+      '<div class="sheet-stamp">'+titulo+'<br>'+new Date().getFullYear()+'</div>'+
+    '</div>'+
+  '</div>';
 }
 
 function buildPreview() {
@@ -517,7 +545,7 @@ window.addEventListener('beforeprint', () => {
 });
 
 /* ── INIT ── */
-function salvarEmpresa(){localStorage.setItem("pf_nome",document.getElementById("nomeEmpresa").value);localStorage.setItem("pf_cnpj",document.getElementById("cnpj").value);localStorage.setItem("pf_tel",document.getElementById("telefone").value);localStorage.setItem("pf_end",document.getElementById("endereco").value);}function carregarEmpresa(){var n=localStorage.getItem("pf_nome");if(n)document.getElementById("nomeEmpresa").value=n;var c=localStorage.getItem("pf_cnpj");if(c)document.getElementById("cnpj").value=c;var t=localStorage.getItem("pf_tel");if(t)document.getElementById("telefone").value=t;var e=localStorage.getItem("pf_end");if(e)document.getElementById("endereco").value=e;}renderToggles();carregarEmpresa();
+renderToggles();
 buildPreview();
 </script>
 </body>
