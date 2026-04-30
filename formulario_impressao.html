@@ -486,10 +486,20 @@ function buildSheet() {
     '<span class="extra-field"><span class="extra-label">'+f+':</span><span class="extra-line"></span></span>'
   ).join('');
 
-  // Campos fixos: Qtd, Defeitos, Operador
+  // Campos fixos condicionais: Qtd, Defeitos, Operador
   const labelQtd = customLabels['qtd_conf']||'Qtd. Conferida';
   const labelDef = customLabels['qtd_def']||'Qtd. Defeitos';
   const labelOp  = customLabels['operador']||'Nome do Operador';
+  const showQtd  = selected.has('qtd_conf');
+  const showDef  = selected.has('qtd_def');
+  const showOp   = selected.has('operador');
+
+  const camposRow = (showQtd || showDef || showOp) ?
+    '<div class="campos-row">'+
+      (showQtd ? '<span class="campo-fixo"><span class="campo-label">'+labelQtd+':</span><span class="campo-line"></span></span>' : '')+
+      (showDef ? '<span class="campo-fixo"><span class="campo-label">'+labelDef+':</span><span class="campo-line"></span></span>' : '')+
+      (showOp  ? '<span class="campo-fixo campo-wide"><span class="campo-label">'+labelOp+':</span><span class="campo-line"></span></span>' : '')+
+    '</div>' : '';
 
   // Bloco de 1 registro
   const bloco = '<div class="registro-bloco">'+
@@ -497,11 +507,7 @@ function buildSheet() {
     '<div class="cb-row"><span class="cb-label">Cor:</span><span class="cb-options">'+corBoxes+'</span></div>'+
     '<div class="cb-row"><span class="cb-label">Tamanho:</span><span class="cb-options">'+tamBoxes+'</span></div>'+
     (extraFields ? '<div class="extra-row">'+extraFields+'</div>' : '')+
-    '<div class="campos-row">'+
-      '<span class="campo-fixo"><span class="campo-label">'+labelQtd+':</span><span class="campo-line"></span></span>'+
-      '<span class="campo-fixo"><span class="campo-label">'+labelDef+':</span><span class="campo-line"></span></span>'+
-      '<span class="campo-fixo campo-wide"><span class="campo-label">'+labelOp+':</span><span class="campo-line"></span></span>'+
-    '</div>'+
+    camposRow+
   '</div>';
 
   // Calcular quantos blocos cabem (estimativa: cada bloco ~28mm, folha útil ~250mm)
