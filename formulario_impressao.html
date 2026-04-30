@@ -381,7 +381,7 @@ function renderToggles() {
   const grid = document.getElementById('colsGrid');
   grid.innerHTML = ALL_COLS.map(col => {
     const on = selected.has(col.id);
-    return '<label class="col-toggle'+(on?' active':'')+(col.locked?' locked':'')+'" data-col="'+col.id+'" onclick="toggleCol(''+col.id+'',this)" style="cursor:pointer">'+
+    return '<label class="col-toggle'+(on?' active':'')+(col.locked?' locked':'')+'" data-col="'+col.id+'" onclick="toggleCol(this.dataset.col,this)" style="cursor:pointer">'+
       '<div class="toggle-check">'+
         '<svg width="11" height="11" viewBox="0 0 12 12" fill="none">'+
           '<path d="M2 6l3 3 5-5" stroke="#fff" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>'+
