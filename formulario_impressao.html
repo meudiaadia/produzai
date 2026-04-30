@@ -19,19 +19,19 @@
 
   /* Blocos de registro */
   .registro-bloco{border:1px solid #ccc;border-radius:4px;padding:5px 8px;margin-bottom:4px;page-break-inside:avoid}
-  .cb-row{display:flex;align-items:flex-start;gap:6px;margin-bottom:3px;font-size:8.5pt}
+  .cb-row{display:flex;align-items:flex-start;gap:6px;margin-bottom:4px;font-size:9.5pt}
   .cb-label{font-weight:600;white-space:nowrap;min-width:60px;padding-top:1px}
   .cb-options{display:flex;flex-wrap:wrap;gap:4px 10px}
-  .cb-item{display:flex;align-items:center;gap:3px;white-space:nowrap}
-  .cb-box{display:inline-block;width:10px;height:10px;border:1px solid #333;border-radius:1px;flex-shrink:0}
+  .cb-item{display:flex;align-items:center;gap:4px;white-space:nowrap;font-size:9pt}
+  .cb-box{display:inline-block;width:12px;height:12px;border:1.5px solid #222;border-radius:1px;flex-shrink:0}
   .extra-row{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:3px;font-size:8.5pt}
   .extra-field{display:flex;align-items:center;gap:4px}
   .extra-label{font-weight:600;white-space:nowrap;font-size:8pt}
   .extra-line{display:inline-block;border-bottom:1px solid #333;min-width:25mm}
-  .campos-row{display:flex;gap:8px;flex-wrap:wrap;margin-top:3px;font-size:8.5pt}
+  .campos-row{display:flex;gap:10px;flex-wrap:wrap;margin-top:4px;font-size:9.5pt}
   .campo-fixo{display:flex;align-items:center;gap:4px}
   .campo-wide{flex:1}
-  .campo-label{font-weight:600;white-space:nowrap;font-size:8pt}
+  .campo-label{font-weight:700;white-space:nowrap;font-size:9pt}
   .campo-line{display:inline-block;border-bottom:1px solid #333;min-width:20mm;flex:1}
 
   .topbar {
@@ -171,15 +171,15 @@
     margin-bottom: 4mm; gap: 5mm;
   }
   .sheet-logo {
-    flex: 0 0 30mm; height: 18mm;
+    flex: 0 0 35mm; height: 22mm;
     display: flex; align-items: center; justify-content: center;
-    border: 0.5pt solid #ddd; border-radius: 2mm; overflow: hidden;
+    border: 1pt solid #999; border-radius: 2mm; overflow: hidden;
   }
   .sheet-logo img { max-width: 100%; max-height: 100%; object-fit: contain; }
   .sheet-logo-placeholder { font-size: 7pt; color: #bbb; text-align: center; }
   .sheet-company { flex: 1; text-align: center; }
-  .sheet-company .emp-nome { font-size: 13pt; font-weight: bold; margin-bottom: 1mm; }
-  .sheet-company .emp-info { font-size: 7pt; color: #666; line-height: 1.6; }
+  .sheet-company .emp-nome { font-size: 15pt; font-weight: bold; margin-bottom: 1mm; color: #000; }
+  .sheet-company .emp-info { font-size: 8.5pt; color: #333; line-height: 1.6; font-weight: 500; }
   .sheet-meta { flex: 0 0 auto; display: flex; flex-direction: column; gap: 2.5mm; }
   .sheet-meta-row { display: flex; flex-direction: column; gap: 0.5mm; }
   .sheet-meta-row span { font-size: 6.5pt; color: #888; text-transform: uppercase; letter-spacing: .03em; }
@@ -296,7 +296,7 @@
     <!-- COLUNAS -->
     <div class="card">
       <div class="card-title">
-        Escolha as colunas do formulário
+        Escolha as informações do formulário
         <span class="badge" id="colCount">0 selecionadas</span>
       </div>
       <div class="cols-grid" id="colsGrid"></div>
@@ -339,7 +339,7 @@
         <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 9V2h12v7"/><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><rect x="6" y="14" width="12" height="8"/></svg>
         Imprimir formulário
       </button>
-      <button class="btn-ghost" onclick="buildPreview()">↺ Atualizar prévia</button>
+      <button class="btn-ghost" onclick="buildPreview();this.textContent='✓ Atualizado!';setTimeout(()=>this.textContent='↺ Atualizar prévia',1500)">↺ Atualizar prévia</button>
       <span class="status-msg" id="statusMsg"></span>
     </div>
 
@@ -381,24 +381,25 @@ function renderToggles() {
   const grid = document.getElementById('colsGrid');
   grid.innerHTML = ALL_COLS.map(col => {
     const on = selected.has(col.id);
-    return `<label class="col-toggle${on?' active':''}${col.locked?' locked':''}" onclick="toggleCol('${col.id}',this)">
-      <input type="checkbox" ${on?'checked':''} ${col.locked?'disabled':''}>
-      <div class="toggle-check">
-        <svg width="11" height="11" viewBox="0 0 12 12" fill="none">
-          <path d="M2 6l3 3 5-5" stroke="#fff" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
-        </svg>
-      </div>
-      <div class="col-toggle-info">
-        <div class="col-toggle-name">${col.label}</div>
-        <div class="col-toggle-desc">${col.desc}</div>
-      </div>
-    </label>`;
+    return '<label class="col-toggle'+(on?' active':'')+(col.locked?' locked':'')+'" data-col="'+col.id+'" onclick="toggleCol(''+col.id+'',this)" style="cursor:pointer">'+
+      '<div class="toggle-check">'+
+        '<svg width="11" height="11" viewBox="0 0 12 12" fill="none">'+
+          '<path d="M2 6l3 3 5-5" stroke="#fff" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>'+
+        '</svg>'+
+      '</div>'+
+      '<div class="col-toggle-info">'+
+        '<div class="col-toggle-name">'+col.label+'</div>'+
+        '<div class="col-toggle-desc">'+col.desc+'</div>'+
+      '</div>'+
+    '</label>';
   }).join('');
   document.getElementById('colCount').textContent = selected.size + ' selecionada' + (selected.size!==1?'s':'');
   renderNameInputs();
 }
 
 function toggleCol(id, el) {
+  if(!el) el = document.querySelector('[data-col="'+id+'"]');
+  if(!el) return;
   if (el.classList.contains('locked')) return;
   if (selected.has(id)) { selected.delete(id); el.classList.remove('active'); }
   else { selected.add(id); el.classList.add('active'); }
@@ -545,7 +546,27 @@ window.addEventListener('beforeprint', () => {
 });
 
 /* ── INIT ── */
+// Carregar dados da empresa do localStorage automaticamente
+function carregarDadosEmpresa(){
+  try{
+    const emp = JSON.parse(localStorage.getItem('produzai_empresa')||'{}');
+    if(emp.nome) document.getElementById('nomeEmpresa').value = emp.nome;
+    if(emp.cnpj) document.getElementById('cnpj').value = emp.cnpj;
+    if(emp.telefone) document.getElementById('telefone').value = emp.telefone;
+    if(emp.endereco) document.getElementById('endereco') && (document.getElementById('endereco').value = emp.endereco);
+    // Carregar logo
+    if(emp.logo_url || localStorage.getItem('produzai_logo')){
+      const logo = emp.logo_url || localStorage.getItem('produzai_logo');
+      if(logo && logo.startsWith('data:')){
+        logoDataUrl = logo;
+        document.getElementById('logoImgWrap').innerHTML = '<img src="'+logo+'" style="max-height:48px;max-width:120px;object-fit:contain">';
+      }
+    }
+  }catch(e){}
+}
+
 renderToggles();
+carregarDadosEmpresa();
 buildPreview();
 </script>
 </body>
