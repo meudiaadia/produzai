@@ -985,7 +985,9 @@ tr:hover td{background:var(--surf2)}
         <div class="fg"><label>CNPJ</label><input id="cfgCnpj" placeholder="00.000.000/0001-00"></div>
         <div class="fg"><label>Telefone</label><input id="cfgTel" placeholder="(00) 00000-0000"></div>
       </div>
-      <div class="fg" style="margin-bottom:10px"><label>Endereço</label><input id="cfgEnd" placeholder="Rua, número, cidade - UF"></div>
+      <div class="fg" style="margin-bottom:14px"><label>Endereço</label><input id="cfgEnd" placeholder="Rua, número, cidade - UF"></div>
+      <button class="btn btn-primary btn-sm" onclick="salvarDadosEmpresa()">💾 Salvar dados da empresa</button>
+      <span id="cfgSaveStatus" style="font-size:12px;color:var(--green);margin-left:10px;display:none">✓ Salvo!</span>
     </div>
     <div class="card">
       <div class="card-title">Padrões de qualidade (quando sem meta individual)</div>
@@ -2703,6 +2705,52 @@ function updateCompany(){
   const cfgNome=g('cfgNome'); if(cfgNome) cfgNome.value=empresa.nome||n;
 }
 
+async function salvarDadosEmpresa(){
+  const nome  = gv('cfgNome').trim();
+  const email = gv('cfgEmail').trim();
+  const cnpj  = gv('cfgCnpj').trim();
+  const tel   = gv('cfgTel').trim();
+  const end   = gv('cfgEnd').trim();
+  const meta_cost  = Number(gv('cfgMetaCost'))||80;
+  const meta_aux   = Number(gv('cfgMetaAux'))||200;
+  const tol_def    = Number(gv('cfgTolDef'))||3;
+  const meta_forms = Number(gv('cfgMetaForms'))||2;
+
+  // Salva no objeto empresa local
+  empresa.nome      = nome;
+  empresa.email     = email;
+  empresa.cnpj      = cnpj;
+  empresa.telefone  = tel;
+  empresa.endereco  = end;
+  empresa.meta_cost = meta_cost;
+  empresa.meta_aux  = meta_aux;
+  empresa.tol_def   = tol_def;
+  empresa.meta_forms= meta_forms;
+
+  // Salva no localStorage
+  saveEmpresa();
+  updateCompany();
+
+  // Salva no Supabase se disponível
+  if(usandoSupabase() && currentUser){
+    const {error} = await _sb.from('empresas').update({
+      nome, email, cnpj, telefone: tel, endereco: end,
+      meta_cost, meta_aux, tol_def, meta_forms
+    }).eq('id', empresa.id || currentUser.id).catch(()=>({error:true}));
+
+    if(!error){
+      const st = g('cfgSaveStatus');
+      if(st){ st.style.display='inline'; setTimeout(()=>st.style.display='none', 2000); }
+      toast('Dados salvos!');
+      return;
+    }
+  }
+
+  const st = g('cfgSaveStatus');
+  if(st){ st.style.display='inline'; setTimeout(()=>st.style.display='none', 2000); }
+  toast('Dados salvos localmente!');
+}
+
 function salvarSupabase(){
   const url=gv('cfgSupaUrl').trim();
   const key=gv('cfgSupaKey').trim();
@@ -2726,22 +2774,24 @@ function renderConfig(){
   g('cfgTotalPecas').textContent=lines.reduce((s,l)=>s+l.qtd_conferida,0).toLocaleString('pt-BR');
   g('cfgTotalCost').textContent=pessoas.filter(p=>p.tipo==='costureira').length;
   g('cfgTotalAux').textContent=pessoas.filter(p=>p.tipo==='auxiliar').length;
-  const key=localStorage.getItem('produzai_key')||''; if(key) g('cfgApiKey').value=key;
+  const key=localStorage.getItem('produzai_key')||''; if(key && g('cfgApiKey')) g('cfgApiKey').value=key;
   // Preencher com dados da empresa
-  if(empresa.nome && g('cfgNome')) g('cfgNome').value=empresa.nome;
-  if(empresa.cnpj && g('cfgCnpj')) g('cfgCnpj').value=empresa.cnpj;
-  if(empresa.telefone && g('cfgTel')) g('cfgTel').value=empresa.telefone;
-  if(empresa.endereco && g('cfgEnd')) g('cfgEnd').value=empresa.endereco;
-  if(empresa.meta_pecas_costureira && g('cfgMetaCost')) g('cfgMetaCost').value=empresa.meta_pecas_costureira;
-  if(empresa.meta_pecas_auxiliar && g('cfgMetaAux')) g('cfgMetaAux').value=empresa.meta_pecas_auxiliar;
-  if(empresa.tolerancia_defeitos && g('cfgTolDef')) g('cfgTolDef').value=empresa.tolerancia_defeitos;
+  if(g('cfgNome')) g('cfgNome').value=empresa.nome||'';
+  if(g('cfgEmail')) g('cfgEmail').value=empresa.email||'';
+  if(g('cfgCnpj')) g('cfgCnpj').value=empresa.cnpj||'';
+  if(g('cfgTel')) g('cfgTel').value=empresa.telefone||'';
+  if(g('cfgEnd')) g('cfgEnd').value=empresa.endereco||'';
+  if(g('cfgMetaCost')) g('cfgMetaCost').value=empresa.meta_cost||empresa.meta_pecas_costureira||80;
+  if(g('cfgMetaAux')) g('cfgMetaAux').value=empresa.meta_aux||empresa.meta_pecas_auxiliar||200;
+  if(g('cfgTolDef')) g('cfgTolDef').value=empresa.tol_def||empresa.tolerancia_defeitos||3;
+  if(g('cfgMetaForms')) g('cfgMetaForms').value=empresa.meta_forms||2;
   // Supabase
   const su=localStorage.getItem('supa_url')||''; if(su&&g('cfgSupaUrl')) g('cfgSupaUrl').value=su;
   const sk=localStorage.getItem('supa_key')||''; if(sk&&g('cfgSupaKey')) g('cfgSupaKey').value=sk;
   if(usandoSupabase()&&g('supaStatus')){ g('supaStatus').textContent='✓ Conectado'; g('supaStatus').style.color='var(--green)'; }
   // Plano
   if(empresa.plano){
-    const planoMap={trial:'Trial (14 dias)',basico:'Básico',pro:'Profissional',enterprise:'Enterprise'};
+    const planoMap={trial:'Trial (14 dias)',basico:'Básico',essential:'Essential',profissional:'Profissional',enterprise:'Enterprise'};
     const cfgPlano=g('cfgPlanoAtual'); if(cfgPlano) cfgPlano.textContent=planoMap[empresa.plano]||empresa.plano;
   }
 }
