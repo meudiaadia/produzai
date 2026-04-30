@@ -2739,7 +2739,11 @@ async function salvarDadosEmpresa(){
       if(empId){
         const {error} = await _sb.from('empresas').update({
           nome, email, cnpj, telefone: tel, endereco: end,
-          meta_cost, meta_aux, tol_def, meta_forms
+          meta_cost, meta_aux, tol_def, meta_forms,
+          meta_pecas_costureira: meta_cost,
+          meta_pecas_auxiliar: meta_aux,
+          tolerancia_defeitos: tol_def,
+          meta_forms_auxiliar: meta_forms
         }).eq('id', empId);
         if(!error){
           empresa.id = empId;
