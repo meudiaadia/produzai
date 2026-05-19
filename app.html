@@ -2251,16 +2251,18 @@ async function analyzeImage(){
 
   const prompt = 'Você está analisando uma imagem de um formulário de controle de produção de confecção.' +
     ' ' + listaProdutos +
-    ' TAREFA: Verificar se a imagem é um formulário legível e extrair os dados.' +
+    ' FORMATO DO FORMULÁRIO: O formulário pode ter dois formatos:' +
+    ' 1) CHECKBOXES: cada bloco tem listas de Modelo/Cor/Tamanho com caixinhas (□) para marcar. A caixinha marcada (✓, X, preenchida ou riscada) indica a opção escolhida. Abaixo dos checkboxes há campos de linha para OP, Qtd, Defeitos e Nome do Operador.' +
+    ' 2) TEXTO LIVRE: campos em branco onde a conferente escreve os dados.' +
+    ' TAREFA: Verificar se a imagem é um formulário legível e extrair os dados de CADA BLOCO preenchido.' +
     ' REGRAS: 1. Se NÃO for formulário: retorne {"erro":"nao_e_formulario"}' +
     ' 2. Se ilegível: retorne {"erro":"ilegivel","motivo":"descrição"}' +
     ' 3. Se vazio/sem dados: retorne {"erro":"vazio","motivo":"sem dados"}' +
-    ' 4. Se legível: extraia todos os dados.' +
-    ' NORMALIZAÇÃO DE PRODUTOS: Se houver produtos cadastrados, tente casar o que está escrito com o produto cadastrado mais próximo (ignore maiúsculas, abreviações e erros de grafia). Se não houver produtos cadastrados, use o nome exatamente como está escrito.' +
-    ' Retorne APENAS este JSON sem texto extra:' +
+    ' 4. Para checkboxes: identifique qual caixinha está marcada em cada seção (Modelo, Cor, Tamanho).' +
+    ' NORMALIZAÇÃO: Se houver produtos cadastrados, case o produto marcado/escrito com o mais próximo da lista.' +
+    ' Retorne APENAS este JSON sem texto extra, com uma entrada por bloco preenchido:' +
     ' {"nome":"conferente","data":"YYYY-MM-DD","linhas":[{"produto":"","cor":"","tamanho":"","op":"","qtd_conferida":0,"qtd_defeitos":0,"num_costureira":"","produto_normalizado":true}]}' +
-    ' Onde produto_normalizado=true se casou com produto cadastrado, false se não casou.' +
-    ' Se campo em branco use "" ou 0. Extraia TODAS as linhas preenchidas.';
+    ' Se campo em branco use "" ou 0. Extraia TODOS os blocos preenchidos.';
 
   try{
     const res=await fetch('/api/analisar',{
