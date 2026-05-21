@@ -1024,7 +1024,7 @@ tr:hover td{background:var(--surf2)}
         <div style="font-size:13px;color:var(--t2)">Costureiras: <strong id="cfgTotalCost">0</strong></div>
         <div style="font-size:13px;color:var(--t2)">Auxiliares: <strong id="cfgTotalAux">0</strong></div>
       </div>
-      <button class="btn btn-ghost btn-sm" style="margin-top:12px;color:var(--red)" onclick="if(confirm('Apagar todos os dados demo?')){records=[];saveRecs();renderAll();toast('Dados apagados')}">Limpar dados demo</button>
+      <button class="btn btn-ghost btn-sm" style="margin-top:12px;color:var(--red)" onclick="apagarDadosDemo()">🗑 Limpar todos os registros</button>
     </div>
 
     <div class="card">
@@ -2281,13 +2281,13 @@ async function analyzeImage(){
   const prompt = 'Você está analisando uma imagem de um formulário de controle de produção de confecção.' +
     ' ' + listaProdutos +
     ' FORMATO DO FORMULÁRIO: O formulário pode ter dois formatos:' +
-    ' 1) CHECKBOXES: cada bloco tem listas de Modelo/Cor/Tamanho com caixinhas (□) para marcar. A caixinha marcada (✓, X, preenchida ou riscada) indica a opção escolhida. Abaixo dos checkboxes há campos de linha para OP, Qtd, Defeitos e Nome do Operador.' +
+    ' 1) CHECKBOXES: cada bloco tem listas de Modelo/Cor/Tamanho com caixinhas (□) para marcar. A caixinha marcada (✓, X, preenchida, circulada ou riscada) indica a opção escolhida. Abaixo dos checkboxes há campos de linha para OP, Qtd, Defeitos e Nome do Operador.' +
     ' 2) TEXTO LIVRE: campos em branco onde a conferente escreve os dados.' +
     ' TAREFA: Verificar se a imagem é um formulário legível e extrair os dados de CADA BLOCO preenchido.' +
     ' REGRAS: 1. Se NÃO for formulário: retorne {"erro":"nao_e_formulario"}' +
     ' 2. Se ilegível: retorne {"erro":"ilegivel","motivo":"descrição"}' +
     ' 3. Se vazio/sem dados: retorne {"erro":"vazio","motivo":"sem dados"}' +
-    ' 4. Para checkboxes: identifique qual caixinha está marcada em cada seção (Modelo, Cor, Tamanho).' +
+    ' LEITURA DE NÚMEROS: Tenha muito cuidado ao ler números escritos à mão. Considere: 1 pode parecer 7, 6 pode parecer 0, 5 pode parecer 3, 9 pode parecer 4. Sempre leia o contexto — quantidade de peças geralmente é entre 1 e 500, defeitos geralmente é entre 0 e 50. Se não conseguir ler o número com certeza, use 0.' +
     ' NORMALIZAÇÃO: Se houver produtos cadastrados, case o produto marcado/escrito com o mais próximo da lista.' +
     ' Retorne APENAS este JSON sem texto extra, com uma entrada por bloco preenchido:' +
     ' {"nome":"conferente","data":"YYYY-MM-DD","linhas":[{"produto":"","cor":"","tamanho":"","op":"","qtd_conferida":0,"qtd_defeitos":0,"num_costureira":"","produto_normalizado":true}]}' +
@@ -2446,7 +2446,22 @@ function adicionarProdutosNovos(){
 }
 function updateRowCount(){ const n=g('reviewBody').querySelectorAll('tr').length; g('rowCount').textContent=n+' linha'+(n!==1?'s':''); }
 function saveRecord(){
-  const rows=[]; g('reviewBody').querySelectorAll('tr').forEach(tr=>{ const ins=tr.querySelectorAll('input'); rows.push({produto:ins[0].value,cor:ins[1].value,tamanho:ins[2].value,op:ins[3].value,qtd_conferida:parseInt(ins[4].value)||0,qtd_defeitos:parseInt(ins[5].value)||0,num_costureira:ins[6].value}); });
+  const rows=[]; 
+  g('reviewBody').querySelectorAll('tr').forEach(tr=>{ 
+    const ins=tr.querySelectorAll('input'); 
+    if(ins.length>=7){
+      rows.push({
+        produto:ins[0].value,
+        cor:ins[1].value,
+        tamanho:ins[2].value,
+        op:ins[3].value,
+        qtd_conferida:parseInt(ins[4].value)||0,
+        qtd_defeitos:parseInt(ins[5].value)||0,
+        num_costureira:ins[6].value
+      }); 
+    }
+  });
+  if(!rows.length){ toast('Nenhuma linha para salvar'); return; }
   const editId=g('reviewBody').dataset.editId;
   const conferente=gv('metaNome');
   const data=gv('metaData');
@@ -2455,20 +2470,26 @@ function saveRecord(){
     g('reviewBody').dataset.editId='';
     toast('Registro atualizado!');
     if(usandoSupabase()&&empresa.id){
-      _sb.from('registros').update({conferente,data,linhas:rows}).eq('id',editId).then();
+      _sb.from('registros').update({conferente,data,linhas:rows}).eq('id',editId);
     }
   } else {
     const novo={id:Date.now(),nome:conferente,conferente,data,linhas:rows,savedAt:new Date().toISOString()};
     records.push(novo);
-    toast('Registro salvo!');
     if(usandoSupabase()&&empresa.id){
       _sb.from('registros').insert({empresa_id:empresa.id,conferente,data,linhas:rows,origem:'foto'}).then(({data:d})=>{
-        if(d&&d[0]) { novo.id=d[0].id; saveRecs(); }
+        if(d&&d[0]){ novo.id=d[0].id; saveRecs(); }
       });
     }
   }
   saveRecs();
-  g('saveMsg').style.display='inline'; setTimeout(()=>g('saveMsg').style.display='none',2500);
+  toast('✅ Registro salvo com sucesso!');
+  // Voltar para tela de foto limpa após salvar
+  setTimeout(()=>{
+    showPage('upload');
+    resetUpload();
+    _produtosParaAdicionar = new Set();
+    const banner = g('bannerNovoProduto'); if(banner) banner.remove();
+  }, 1200);
 }
 
 // ── METAS / CADASTRO PESSOAS ─────────────────────────────
@@ -3403,6 +3424,18 @@ async function marcarConviteUsado(codigo){
   if(usandoSupabase()){
     await _sb.from('convites').update({usado:true,usado_em:new Date().toISOString()}).eq('codigo',codigo).catch(()=>{});
   }
+}
+
+async function apagarDadosDemo(){
+  if(!confirm('Apagar TODOS os registros desta empresa? Esta ação não pode ser desfeita.')) return;
+  records = [];
+  saveRecs();
+  // Apagar também do Supabase
+  if(usandoSupabase() && empresa.id){
+    await _sb.from('registros').delete().eq('empresa_id', empresa.id);
+  }
+  renderAll();
+  toast('Todos os registros foram apagados!');
 }
 
 function seedDemo(){
