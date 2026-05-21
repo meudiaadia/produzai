@@ -1733,7 +1733,22 @@ async function carregarDadosEmpresa(){
   const {data:usr}=await _sb.from('usuarios').select('empresa_id,perfil,nome').eq('id',currentUser.id).single();
   if(!usr) return;
   const {data:emp}=await _sb.from('empresas').select('*').eq('id',usr.empresa_id).single();
-  if(emp){ empresa={...emp}; saveEmpresa(); }
+  if(emp){ 
+    empresa={...emp}; saveEmpresa();
+    // Carregar produtos, cores e tamanhos do Supabase
+    if(emp.produtos && emp.produtos.length > 0){
+      produtosCadastrados = emp.produtos;
+      localStorage.setItem('produzai_prods', JSON.stringify(produtosCadastrados));
+    }
+    if(emp.cores && emp.cores.length > 0){
+      coresCadastradas = emp.cores;
+      localStorage.setItem('produzai_cores', JSON.stringify(coresCadastradas));
+    }
+    if(emp.tamanhos && emp.tamanhos.length > 0){
+      tamanhosCadastrados = emp.tamanhos;
+      localStorage.setItem('produzai_tams', JSON.stringify(tamanhosCadastrados));
+    }
+  }
 
   // carregar pessoas
   const {data:pss}=await _sb.from('pessoas').select('*').eq('empresa_id',usr.empresa_id).eq('ativo',true);
@@ -3136,17 +3151,34 @@ function renderComparativo(){
 
 // ── CADASTRO DE PRODUTOS ──────────────────────────────────
 let produtosCadastrados=JSON.parse(localStorage.getItem('produzai_prods')||'[]');
+async function salvarListasSupabase(){
+  if(!usandoSupabase()||!empresa.id) return;
+  try{
+    const {data:usr} = await _sb.from('usuarios').select('empresa_id').eq('id',currentUser.id).single();
+    const empId = usr?.empresa_id || empresa.id;
+    if(empId){
+      await _sb.from('empresas').update({
+        produtos: produtosCadastrados,
+        cores: coresCadastradas,
+        tamanhos: tamanhosCadastrados
+      }).eq('id', empId);
+    }
+  }catch(e){ console.error('Erro ao salvar listas:', e); }
+}
+
 function adicionarProduto(){
   const v=gv('novoProduto').trim(); if(!v){ toast('Digite o nome'); return; }
   if(produtosCadastrados.includes(v)){ toast('Já cadastrado'); return; }
   produtosCadastrados.push(v);
   localStorage.setItem('produzai_prods',JSON.stringify(produtosCadastrados));
   g('novoProduto').value=''; renderListaProdutos(); toast('Produto adicionado!');
+  salvarListasSupabase();
 }
 function removerProduto(nome){
   produtosCadastrados=produtosCadastrados.filter(p=>p!==nome);
   localStorage.setItem('produzai_prods',JSON.stringify(produtosCadastrados));
   renderListaProdutos();
+  salvarListasSupabase();
 }
 function renderListaProdutos(){
   const el=g('listaProdutos'); if(!el) return;
@@ -3162,11 +3194,13 @@ function adicionarCor(){
   coresCadastradas.push(v);
   localStorage.setItem('produzai_cores',JSON.stringify(coresCadastradas));
   g('novaCor').value=''; renderListaCores(); toast('Cor adicionada!');
+  salvarListasSupabase();
 }
 function removerCor(nome){
   coresCadastradas=coresCadastradas.filter(c=>c!==nome);
   localStorage.setItem('produzai_cores',JSON.stringify(coresCadastradas));
   renderListaCores();
+  salvarListasSupabase();
 }
 function renderListaCores(){
   const el=g('listaCores'); if(!el) return;
@@ -3182,11 +3216,13 @@ function adicionarTamanho(){
   tamanhosCadastrados.push(v);
   localStorage.setItem('produzai_tams',JSON.stringify(tamanhosCadastrados));
   g('novoTam').value=''; renderListaTamanhos(); toast('Tamanho adicionado!');
+  salvarListasSupabase();
 }
 function removerTamanho(nome){
   tamanhosCadastrados=tamanhosCadastrados.filter(t=>t!==nome);
   localStorage.setItem('produzai_tams',JSON.stringify(tamanhosCadastrados));
   renderListaTamanhos();
+  salvarListasSupabase();
 }
 function renderListaTamanhos(){
   const el=g('listaTamanhos'); if(!el) return;
