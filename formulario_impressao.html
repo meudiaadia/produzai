@@ -181,9 +181,9 @@
   .sheet-company .emp-nome { font-size: 15pt; font-weight: bold; margin-bottom: 1mm; color: #000; }
   .sheet-company .emp-info { font-size: 8.5pt; color: #333; line-height: 1.6; font-weight: 500; }
   .sheet-meta { flex: 0 0 auto; display: flex; flex-direction: column; gap: 2.5mm; }
-  .sheet-meta-row { display: flex; flex-direction: column; gap: 0.5mm; }
-  .sheet-meta-row span { font-size: 6.5pt; color: #888; text-transform: uppercase; letter-spacing: .03em; }
-  .meta-line { border-bottom: 0.5pt solid #aaa; min-width: 40mm; height: 5mm; background: #fafafa; }
+  .sheet-meta-row { display: flex; align-items: center; gap: 2mm; }
+  .sheet-meta-row span { font-size: 7.5pt; color: #333; font-weight: 600; white-space: nowrap; }
+  .meta-line { border-bottom: 1pt solid #555; min-width: 40mm; height: 6mm; flex: 1; }
 
   .sheet-title {
     background: #1A1714; color: #fff; text-align: center;
@@ -481,13 +481,14 @@ function buildSheet() {
   // Checkboxes de tamanhos
   const tamBoxes = tamanhos.map(t => '<span class="cb-item"><span class="cb-box"></span>'+t+'</span>').join('');
 
-  // Campos condicionais todos na mesma linha: OP, Lote, Turno, Hora + Qtd + Defeitos
   const labelQtd = customLabels['qtd_conf']||'Qtd. Conf.';
   const labelDef = customLabels['qtd_def']||'Defeitos';
   const labelOp  = customLabels['operador']||'Nome do Operador';
+  const labelCost = customLabels['num_cost']||'Nº Costureira';
   const showQtd  = selected.has('qtd_conf');
   const showDef  = selected.has('qtd_def');
   const showOp   = selected.has('operador');
+  const showCost = selected.has('num_cost');
 
   const linhaFields = [];
   if(selected.has('op'))       linhaFields.push(customLabels['op']||'OP');
@@ -495,8 +496,9 @@ function buildSheet() {
   if(selected.has('turno'))    linhaFields.push(customLabels['turno']||'Turno');
   if(selected.has('hora_ini')) linhaFields.push(customLabels['hora_ini']||'Hora Início');
   if(selected.has('hora_fim')) linhaFields.push(customLabels['hora_fim']||'Hora Fim');
-  if(showQtd) linhaFields.push(labelQtd);
-  if(showDef) linhaFields.push(labelDef);
+  if(showCost) linhaFields.push(labelCost);
+  if(showQtd)  linhaFields.push(labelQtd);
+  if(showDef)  linhaFields.push(labelDef);
 
   const linhaFieldsHtml = linhaFields.map(f =>
     '<span class="campo-fixo"><span class="campo-label">'+f+':</span><span class="extra-line"></span></span>'

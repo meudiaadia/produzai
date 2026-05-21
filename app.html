@@ -752,9 +752,9 @@ tr:hover td{background:var(--surf2)}
       </div>
       <button class="add-row" onclick="addRow()">+ Adicionar linha</button>
     </div>
-    <div style="display:flex;gap:8px;align-items:center;padding:8px 0">
-      <button class="btn btn-green" onclick="saveRecord()">Salvar registro</button>
-      <button class="btn btn-ghost" onclick="showPage('upload')">← Voltar</button>
+    <div style="display:flex;gap:8px;align-items:center;padding:8px 0;flex-wrap:wrap">
+      <button class="btn btn-green" onclick="saveRecord()">✅ Salvar registro</button>
+      <button class="btn btn-ghost" onclick="showPage('upload')">← Nova foto</button>
       <span id="saveMsg" style="font-size:13px;color:var(--green);display:none">✓ Salvo!</span>
     </div>
   </div>
@@ -2287,6 +2287,7 @@ async function analyzeImage(){
     ' REGRAS: 1. Se NÃO for formulário: retorne {"erro":"nao_e_formulario"}' +
     ' 2. Se ilegível: retorne {"erro":"ilegivel","motivo":"descrição"}' +
     ' 3. Se vazio/sem dados: retorne {"erro":"vazio","motivo":"sem dados"}' +
+    ' LEITURA DE DATA: A data pode estar escrita em vários formatos (DD/MM/AAAA, DD-MM-AA, por extenso). Converta sempre para YYYY-MM-DD. Se não conseguir ler a data, use a data de hoje: '+new Date().toISOString().split('T')[0]+'. ' +
     ' LEITURA DE NÚMEROS: Tenha muito cuidado ao ler números escritos à mão. Considere: 1 pode parecer 7, 6 pode parecer 0, 5 pode parecer 3, 9 pode parecer 4. Sempre leia o contexto — quantidade de peças geralmente é entre 1 e 500, defeitos geralmente é entre 0 e 50. Se não conseguir ler o número com certeza, use 0.' +
     ' NORMALIZAÇÃO: Se houver produtos cadastrados, case o produto marcado/escrito com o mais próximo da lista.' +
     ' Retorne APENAS este JSON sem texto extra, com uma entrada por bloco preenchido:' +
