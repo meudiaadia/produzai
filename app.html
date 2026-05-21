@@ -2088,20 +2088,49 @@ function fecharMobileMenu(){
 // ── UPLOAD ───────────────────────────────────────────────
 function handleDrop(e){ e.preventDefault(); g('dropZone').classList.remove('drag'); const f=e.dataTransfer.files[0]; if(f&&f.type.startsWith('image/')) handleFile(f); }
 function handleFile(file){
-  if(!file)return;
-  const r=new FileReader();
-  r.onload=ev=>{
-    imgB64=ev.target.result.split(',')[1];
-    g('previewImg').src=ev.target.result;
+  if(!file) return;
+  // Converter para JPEG via canvas (resolve HEIC do iPhone e reduz tamanho)
+  const img = new Image();
+  const objectUrl = URL.createObjectURL(file);
+  img.onload = function(){
+    URL.revokeObjectURL(objectUrl);
+    // Redimensionar se muito grande (max 1600px)
+    const MAX = 1600;
+    let w = img.width, h = img.height;
+    if(w > MAX || h > MAX){
+      if(w > h){ h = Math.round(h * MAX / w); w = MAX; }
+      else { w = Math.round(w * MAX / h); h = MAX; }
+    }
+    const canvas = document.createElement('canvas');
+    canvas.width = w; canvas.height = h;
+    const ctx = canvas.getContext('2d');
+    ctx.fillStyle = '#fff';
+    ctx.fillRect(0, 0, w, h);
+    ctx.drawImage(img, 0, 0, w, h);
+    const dataUrl = canvas.toDataURL('image/jpeg', 0.88);
+    imgB64 = dataUrl.split(',')[1];
+    g('previewImg').src = dataUrl;
     g('previewBox').classList.add('show');
-    // Esconde os botões de upload e mostra botão fixo no mobile
-    g('uploadBtns').style.display='none';
-    const fixed=g('previewActionsFixed');
-    if(fixed) fixed.style.display='flex';
-    // Scroll para a preview no mobile
-    setTimeout(()=>g('previewBox').scrollIntoView({behavior:'smooth',block:'start'}),100);
+    g('uploadBtns').style.display = 'none';
+    const fixed = g('previewActionsFixed');
+    if(fixed) fixed.style.display = 'flex';
+    setTimeout(()=>g('previewBox').scrollIntoView({behavior:'smooth',block:'start'}), 100);
   };
-  r.readAsDataURL(file);
+  img.onerror = function(){
+    // Fallback: lê direto sem conversão
+    URL.revokeObjectURL(objectUrl);
+    const r = new FileReader();
+    r.onload = ev => {
+      imgB64 = ev.target.result.split(',')[1];
+      g('previewImg').src = ev.target.result;
+      g('previewBox').classList.add('show');
+      g('uploadBtns').style.display = 'none';
+      const fixed = g('previewActionsFixed');
+      if(fixed) fixed.style.display = 'flex';
+    };
+    r.readAsDataURL(file);
+  };
+  img.src = objectUrl;
 }
 function resetUpload(){
   imgB64=null;
